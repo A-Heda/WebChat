@@ -9,4 +9,4 @@ The format of group chat saves in data base -->
 
 The path to save a chat messages --> database/chats/chatId.txt
 That chatId format for privateChats is like --> private_user1Id_user2Id ... in which always the smaller number comes first. private_1_2(true)    private_2_1(not our format) 
-chatId format for privateChats is like --> group_groupId  e.g. group_1
+chatId format for privateChats is like --> group_groupId  .. e.g. group_1
