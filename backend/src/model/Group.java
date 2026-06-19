@@ -14,6 +14,8 @@ public class Group {
 
     private List<String> memberIds;
 
+    private String groupImagePath;
+
     
 
     public Group(String id, String name, String adminId) {
@@ -61,6 +63,14 @@ public class Group {
 
     public void setMemberIds(List<String> memberIds) {
         this.memberIds = memberIds;
+    }
+
+    public String getGroupImagePath() {
+        return groupImagePath;
+    }
+
+    public void setGroupImagePath(String groupImagePath) {
+        this.groupImagePath = groupImagePath;
     }
 
 }
