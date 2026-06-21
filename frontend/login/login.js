@@ -1,10 +1,20 @@
-function login() {
+function login(){
 
-    const username =
-        document.getElementById("username").value;
+    const id =
+        document.getElementById("id").value;
 
     const password =
         document.getElementById("password").value;
 
-    alert("Welcome to Blink, " + username + "!");
+    if(id === ""){
+        alert("User ID is required.");
+        return;
+    }
+
+    if(password === ""){
+        alert("Password is required.");
+        return;
+    }
+
+    alert("Welcome to Blink!");
 }

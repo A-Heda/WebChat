@@ -5,12 +5,15 @@
 }
 
 body{
-    font-family:Segoe UI, sans-serif;
     height:100vh;
 
     display:flex;
+
     justify-content:center;
+
     align-items:center;
+
+    font-family:Segoe UI,sans-serif;
 
     background:linear-gradient(
             135deg,
@@ -36,13 +39,18 @@ body{
 }
 
 h1{
+
     color:#2563eb;
+
+    font-size:42px;
+
     margin-bottom:10px;
-    font-size:40px;
 }
 
 .subtitle{
+
     color:#64748b;
+
     margin-bottom:25px;
 }
 
@@ -72,7 +80,7 @@ button{
 
     width:100%;
 
-    margin-top:18px;
+    margin-top:20px;
 
     padding:12px;
 
@@ -96,9 +104,9 @@ button:hover{
     background:#1d4ed8;
 }
 
-.signup-link{
+.link{
 
-    margin-top:18px;
+    margin-top:20px;
 
     color:#64748b;
 }

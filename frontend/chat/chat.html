@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blink</title>
+    <link rel="stylesheet" href="chat.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+<body>
+    <div class="app">
+
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <div class="user-info">
+                    <img id="profile-pic" src="../assets/default-avatar.png" alt="Profile" class="avatar">
+                    <span id="current-username">Username</span>
+                </div>
+                <div class="header-icons">
+                    <button class="icon-btn" title="Settings" onclick="openSettings()">
+                        <i class="fa-solid fa-gear"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div class="search-bar">
+                <i class="fa-solid fa-magnifying-glass"></i>
+                <input type="text" id="search-input" placeholder="Search chats..." oninput="searchChats()">
+            </div>
+
+            <!-- Special folders -->
+            <div class="special-folders">
+                <div class="folder-item" onclick="openSavedMessages()">
+                    <div class="folder-icon saved">
+                        <i class="fa-solid fa-bookmark"></i>
+                    </div>
+                    <span>Saved Messages</span>
+                </div>
+                <div class="folder-item" onclick="openArchive()">
+                    <div class="folder-icon archive">
+                        <i class="fa-solid fa-box-archive"></i>
+                    </div>
+                    <span>Archive</span>
+                </div>
+            </div>
+
+            <div class="chat-list" id="chat-list">
+                <p class="empty-msg">No chats yet.</p>
+            </div>
+
+            <button class="new-chat-btn" title="New Chat" onclick="openNewChat()">
+                <i class="fa-solid fa-pen-to-square"></i>
+            </button>
+        </div>
+
+        <!-- Chat Window -->
+        <div class="chat-window" id="chat-window">
+            <div class="no-chat-selected">
+                <i class="fa-solid fa-comments"></i>
+                <p>Select a chat to start messaging</p>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Add Contact Modal -->
+    <div class="modal-overlay" id="add-contact-modal">
+        <div class="modal">
+            <h3>Add Contact</h3>
+            <input type="text" id="contact-id-input" placeholder="Enter User ID">
+            <div class="modal-actions">
+                <button onclick="closeModal('add-contact-modal')">Cancel</button>
+                <button class="primary" onclick="addContact()">Add</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Settings Modal -->
+    <div class="modal-overlay" id="settings-modal">
+        <div class="modal settings-modal">
+            <h3>Settings</h3>
+
+            <div class="settings-option" onclick="openChangePhoto()">
+                <i class="fa-solid fa-camera"></i>
+                <span>Change Profile Photo</span>
+                <i class="fa-solid fa-chevron-right settings-arrow"></i>
+            </div>
+
+            <div class="settings-option" onclick="openChangeName()">
+                <i class="fa-solid fa-user-pen"></i>
+                <span>Change Display Name</span>
+                <i class="fa-solid fa-chevron-right settings-arrow"></i>
+            </div>
+
+            <div class="settings-option" onclick="openChangeId()">
+                <i class="fa-solid fa-at"></i>
+                <span>Change User ID</span>
+                <i class="fa-solid fa-chevron-right settings-arrow"></i>
+            </div>
+
+            <div class="settings-option" onclick="toggleDarkMode()">
+                <i class="fa-solid fa-moon" id="dark-mode-icon"></i>
+                <span id="dark-mode-label">Dark Mode</span>
+                <div class="toggle-switch" id="dark-mode-toggle">
+                    <div class="toggle-knob"></div>
+                </div>
+            </div>
+
+            <div class="settings-divider"></div>
+
+            <div class="settings-option danger" onclick="openDeleteAccount()">
+                <i class="fa-solid fa-trash"></i>
+                <span>Delete Account</span>
+            </div>
+
+            <div class="settings-option logout" onclick="logout()">
+                <i class="fa-solid fa-right-from-bracket"></i>
+                <span>Logout</span>
+            </div>
+
+            <div class="modal-actions">
+                <button onclick="closeModal('settings-modal')">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Change Name Modal -->
+    <div class="modal-overlay" id="change-name-modal">
+        <div class="modal">
+            <h3>Change Display Name</h3>
+            <input type="text" id="new-name-input" placeholder="Enter new name">
+            <div class="modal-actions">
+                <button onclick="closeModal('change-name-modal')">Cancel</button>
+                <button class="primary" onclick="saveName()">Save</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Change User ID Modal -->
+    <div class="modal-overlay" id="change-id-modal">
+        <div class="modal">
+            <h3>Change User ID</h3>
+            <p class="modal-hint">Your User ID is used by others to find you.</p>
+            <input type="text" id="new-id-input" placeholder="Enter new user ID">
+            <div class="modal-actions">
+                <button onclick="closeModal('change-id-modal')">Cancel</button>
+                <button class="primary" onclick="saveUserId()">Save</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete Account Modal -->
+    <div class="modal-overlay" id="delete-account-modal">
+        <div class="modal">
+            <h3>Delete Account</h3>
+            <p class="modal-hint danger-hint">This action is permanent and cannot be undone. All your data will be erased.</p>
+            <input type="password" id="delete-confirm-password" placeholder="Enter your password to confirm">
+            <div class="modal-actions">
+                <button onclick="closeModal('delete-account-modal')">Cancel</button>
+                <button class="danger-btn" onclick="deleteAccount()">Delete</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Hidden file input for photo upload -->
+    <input type="file" id="photo-upload" accept="image/*" style="display:none" onchange="handlePhotoUpload(event)">
+
+    <script src="chat.js"></script>
+</body>
+</html>
