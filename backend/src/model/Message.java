@@ -1,20 +1,21 @@
+// Message.java
 package model;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class Message {
 
     private String id;
-
     private String senderId;
-
     private String text;
-
     private long timestamp;
-
     private boolean edited;
-
     private boolean deleted;
-
     private String chatId;
+    private String previousContent;
+    private String mediaUrl;
+    private List<String> reportedBy;
 
     public Message(String id, String senderId, String text, long timestamp, String chatId) {
         this.id = id;
@@ -22,72 +23,98 @@ public class Message {
         this.text = text;
         this.timestamp = timestamp;
         this.chatId = chatId;
-
-        edited = false;
-        deleted = false;
+        this.edited = false;
+        this.deleted = false;
+        this.previousContent = null;
+        this.mediaUrl = null;
+        this.reportedBy = new ArrayList<>();
     }
 
-    public String getId () {
+    public String getId() {
         return id;
     }
 
-    public void setId (String id) {
+    public void setId(String id) {
         this.id = id;
     }
 
-    public String getSenderId () {
+    public String getSenderId() {
         return senderId;
     }
 
-    public void setSenderId (String senderId) {
+    public void setSenderId(String senderId) {
         this.senderId = senderId;
     }
 
-    public String getText () {
+    public String getText() {
         return text;
     }
 
-    public void setText (String text) {
+    public void setText(String text) {
         this.text = text;
     }
 
-    public long getTimestamp () {
+    public long getTimestamp() {
         return timestamp;
     }
 
-    public void setTimestamp (long timestamp) {
+    public void setTimestamp(long timestamp) {
         this.timestamp = timestamp;
     }
 
-    public boolean isEdited () {
+    public boolean isEdited() {
         return edited;
     }
 
-    public void setEdited (boolean edited) {
+    public void setEdited(boolean edited) {
         this.edited = edited;
     }
 
-    public boolean isDeleted () {
+    public boolean isDeleted() {
         return deleted;
     }
 
-    public void setDeleted (boolean deleted) {
+    public void setDeleted(boolean deleted) {
         this.deleted = deleted;
     }
 
-    public String getChatId () {
+    public String getChatId() {
         return chatId;
     }
 
-    public void setChatId (String chatId) {
+    public void setChatId(String chatId) {
         this.chatId = chatId;
     }
 
-    @Override
-    public String toString() {      //created to use to save to database
-        return id + "|" +
-           senderId + "|" + text + "|" + timestamp + "|" +
-           edited + "|" + deleted + "|" + chatId;
+    public String getPreviousContent() {
+        return previousContent;
     }
 
+    public void setPreviousContent(String previousContent) {
+        this.previousContent = previousContent;
+    }
+
+    public String getMediaUrl() {
+        return mediaUrl;
+    }
+
+    public void setMediaUrl(String mediaUrl) {
+        this.mediaUrl = mediaUrl;
+    }
+
+    public List<String> getReportedBy() {
+        return reportedBy;
+    }
+
+    public void setReportedBy(List<String> reportedBy) {
+        this.reportedBy = reportedBy;
+    }
+
+    @Override
+    public String toString() {
+        return id + "|" + senderId + "|" + text + "|" + timestamp + "|" +
+                edited + "|" + deleted + "|" + chatId + "|" +
+                (previousContent != null ? previousContent : "") + "|" +
+                (mediaUrl != null ? mediaUrl : "");
+    }
 }
