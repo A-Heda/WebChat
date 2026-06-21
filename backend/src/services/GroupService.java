@@ -1,180 +1,231 @@
-// GroupService.java
 package services;
 
 import model.Group;
 import model.User;
-import java.util.*;
+import repositories.GroupRepository;
+import repositories.UserRepository;
+
+import java.util.List;
+
 
 public class GroupService {
 
-    private Map<String, Group> groups; // groupId -> Group
+    private GroupRepository groupRepository;
+    private UserRepository userRepository;
+
 
     public GroupService() {
-        this.groups = new HashMap<>();
+        groupRepository = new GroupRepository();
+        userRepository = new UserRepository();
     }
 
-    // ساخت گروه جدید
-    public Group createGroup(String name, String adminId) {
-        String groupId = UUID.randomUUID().toString();
-        Group group = new Group(groupId, name, adminId);
-        groups.put(groupId, group);
-        return group;
+
+    private String validateGroupId(String id) {
+
+        if(id == null || id.trim().isEmpty())
+            return "Group ID cannot be empty.";
+
+        if(groupRepository.findById(id) != null)
+            return "Group ID already exists.";
+
+        return "Group ID is valid.";
     }
 
-    // دریافت اطلاعات گروه
-    public Group getGroup(String groupId) {
-        return groups.get(groupId);
+
+    private String validateGroupName(String name) {
+
+        if(name == null || name.trim().isEmpty())
+            return "Group name cannot be empty.";
+
+        if(name.length() < 3)
+            return "Group name must be at least 3 characters.";
+
+        return "Group name is valid.";
     }
 
-    // افزودن عضو به گروه
-    public boolean addMember(String groupId, String userId, String requesterId) {
-        Group group = groups.get(groupId);
-        if (group == null) return false;
 
-        // فقط ادمین می‌تواند عضو اضافه کند
-        if (!group.getAdminId().equals(requesterId)) {
-            return false;
-        }
+    public String createGroup(String id, String name, String adminId) {
 
-        if (!group.getMemberIds().contains(userId)) {
-            group.getMemberIds().add(userId);
-            return true;
-        }
-        return false;
+        String idResponse = validateGroupId(id);
+        if(!idResponse.equals("Group ID is valid."))
+            return idResponse;
+
+
+        String nameResponse = validateGroupName(name);
+        if(!nameResponse.equals("Group name is valid."))
+            return nameResponse;
+
+
+        User admin = userRepository.findById(adminId);
+
+        if(admin == null)
+            return "Admin user not found.";
+
+
+        Group group = new Group(id, name, adminId);
+
+        groupRepository.saveGroup(group);
+
+        return "SUCCESS";
     }
 
-    // حذف عضو از گروه
-    public boolean removeMember(String groupId, String userId, String requesterId) {
-        Group group = groups.get(groupId);
-        if (group == null) return false;
 
-        // فقط ادمین می‌تواند عضو حذف کند
-        if (!group.getAdminId().equals(requesterId)) {
-            return false;
-        }
+    public String addMember(String groupId, String userId) {
 
-        // ادمین نمی‌تواند خودش را حذف کند
-        if (userId.equals(group.getAdminId())) {
-            return false;
-        }
+        Group group = groupRepository.findById(groupId);
 
-        return group.getMemberIds().remove(userId);
+        if(group == null)
+            return "Group not found.";
+
+
+        User user = userRepository.findById(userId);
+
+        if(user == null)
+            return "User not found.";
+
+
+        if(group.getMemberIds().contains(userId))
+            return "User is already a member.";
+
+
+        group.getMemberIds().add(userId);
+
+        groupRepository.updateGroup(group);
+
+        return "SUCCESS";
     }
 
-    // خروج از گروه
-    public boolean leaveGroup(String groupId, String userId) {
-        Group group = groups.get(groupId);
-        if (group == null) return false;
 
-        // اگر ادمین بخواهد خارج شود، باید ابتدا ادمین را تغییر دهد
-        if (userId.equals(group.getAdminId())) {
-            return false;
-        }
+    public String removeMember(String groupId, String userId) {
 
-        return group.getMemberIds().remove(userId);
+        Group group = groupRepository.findById(groupId);
+
+        if(group == null)
+            return "Group not found.";
+
+
+        if(!group.getMemberIds().contains(userId))
+            return "User is not a member of this group.";
+
+
+        if(group.getAdminId().equals(userId))
+            return "Admin cannot be removed from the group.";
+
+
+        group.getMemberIds().remove(userId);
+
+        groupRepository.updateGroup(group);
+
+        return "SUCCESS";
     }
 
-    // تغییر ادمین گروه
-    public boolean changeAdmin(String groupId, String newAdminId, String currentAdminId) {
-        Group group = groups.get(groupId);
-        if (group == null) return false;
 
-        // فقط ادمین فعلی می‌تواند ادمین را تغییر دهد
-        if (!group.getAdminId().equals(currentAdminId)) {
-            return false;
-        }
+    public String leaveGroup(String groupId, String userId) {
 
-        // عضو جدید باید در گروه باشد
-        if (!group.getMemberIds().contains(newAdminId)) {
-            return false;
-        }
-
-        group.setAdminId(newAdminId);
-        return true;
+        return removeMember(groupId, userId);
     }
 
-    // تغییر نام گروه
-    public boolean updateGroupName(String groupId, String newName, String requesterId) {
-        Group group = groups.get(groupId);
-        if (group == null) return false;
 
-        // فقط ادمین می‌تواند نام گروه را تغییر دهد
-        if (!group.getAdminId().equals(requesterId)) {
-            return false;
-        }
+    public String deleteGroup(String groupId, String adminId) {
+
+        Group group = groupRepository.findById(groupId);
+
+        if(group == null)
+            return "Group not found.";
+
+
+        if(!group.getAdminId().equals(adminId))
+            return "Only the admin can delete the group.";
+
+
+        groupRepository.deleteGroup(groupId);
+
+        return "SUCCESS";
+    }
+
+
+    public String changeGroupName(String groupId, String newName) {
+
+        Group group = groupRepository.findById(groupId);
+
+        if(group == null)
+            return "Group not found.";
+
+
+        String response = validateGroupName(newName);
+
+        if(!response.equals("Group name is valid."))
+            return response;
+
 
         group.setName(newName);
-        return true;
+
+        groupRepository.updateGroup(group);
+
+        return "SUCCESS";
     }
 
-    // تغییر توضیحات گروه
-    public boolean updateGroupDescription(String groupId, String description, String requesterId) {
-        Group group = groups.get(groupId);
-        if (group == null) return false;
 
-        // فقط ادمین می‌تواند توضیحات را تغییر دهد
-        if (!group.getAdminId().equals(requesterId)) {
-            return false;
-        }
+    public String changeDescription(String groupId, String description) {
+
+        Group group = groupRepository.findById(groupId);
+
+        if(group == null)
+            return "Group not found.";
+
+
+        if(description == null)
+            return "Description cannot be null.";
+
 
         group.setDescription(description);
-        return true;
+
+        groupRepository.updateGroup(group);
+
+        return "SUCCESS";
     }
 
-    // تغییر تصویر گروه
-    public boolean updateGroupImage(String groupId, String imagePath, String requesterId) {
-        Group group = groups.get(groupId);
-        if (group == null) return false;
 
-        // فقط ادمین می‌تواند تصویر گروه را تغییر دهد
-        if (!group.getAdminId().equals(requesterId)) {
-            return false;
-        }
+    public String changeGroupImage(String groupId, String imagePath) {
+
+        Group group = groupRepository.findById(groupId);
+
+        if(group == null)
+            return "Group not found.";
+
+
+        if(imagePath == null || imagePath.trim().isEmpty())
+            return "Image path cannot be empty.";
+
 
         group.setGroupImagePath(imagePath);
-        return true;
+
+        groupRepository.updateGroup(group);
+
+        return "SUCCESS";
     }
 
-    // دریافت لیست اعضای گروه
-    public List<String> getMembers(String groupId) {
-        Group group = groups.get(groupId);
-        return group != null ? new ArrayList<>(group.getMemberIds()) : new ArrayList<>();
+
+    public Group findGroupById(String groupId) {
+
+        return groupRepository.findById(groupId);
     }
 
-    // چک کردن عضویت در گروه
-    public boolean isMember(String groupId, String userId) {
-        Group group = groups.get(groupId);
-        return group != null && group.getMemberIds().contains(userId);
+
+    public List<Group> getAllGroups() {
+
+        return groupRepository.getAllGroups();
     }
 
-    // چک کردن ادمین بودن
+
     public boolean isAdmin(String groupId, String userId) {
-        Group group = groups.get(groupId);
-        return group != null && group.getAdminId().equals(userId);
-    }
 
-    // دریافت تمام گروه‌های یک کاربر
-    public List<Group> getUserGroups(String userId) {
-        List<Group> userGroups = new ArrayList<>();
-        for (Group group : groups.values()) {
-            if (group.getMemberIds().contains(userId)) {
-                userGroups.add(group);
-            }
-        }
-        return userGroups;
-    }
+        Group group = groupRepository.findById(groupId);
 
-    // حذف گروه (فقط توسط ادمین)
-    public boolean deleteGroup(String groupId, String requesterId) {
-        Group group = groups.get(groupId);
-        if (group == null) return false;
-
-        // فقط ادمین می‌تواند گروه را حذف کند
-        if (!group.getAdminId().equals(requesterId)) {
+        if(group == null)
             return false;
-        }
 
-        groups.remove(groupId);
-        return true;
+
+        return group.getAdminId().equals(userId);
     }
 }
