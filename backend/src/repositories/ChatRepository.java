@@ -10,6 +10,7 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 
 
@@ -17,26 +18,76 @@ public class ChatRepository {
     private static final String CHATS_DIRECTORY = "database/chats/";
 
     private String serializeMessage(Message message) {
-        return message.getId() + "|" + message.getSenderId()
-                + "|" + message.getText() + "|" + message.getTimestamp() + "|"
-                + message.isEdited()+ "|" + message.isDeleted()+ "|" + message.getChatId();
-    }
+
+
+    String previousContent =
+            message.getPreviousContent() == null ?
+            "" : message.getPreviousContent();
+
+
+    String mediaUrl =
+            message.getMediaUrl() == null ?
+            "" : message.getMediaUrl();
+
+
+    String reports =
+            String.join(",", message.getReportedBy());
+
+
+    return message.getId() + "|" +
+            message.getSenderId() + "|" +
+            message.getText() + "|" +
+            message.getTimestamp() + "|" +
+            message.isEdited() + "|" +
+            message.isDeleted() + "|" +
+            message.getChatId() + "|" +
+            previousContent + "|" +
+            mediaUrl + "|" +
+            reports;
+}
 
     private Message deserializeMessage(String line) {
-        String[] parts = line.split("\\|");
 
-         if(parts.length != 7) {
-            return null;
-        }
-        long timestamp = Long.parseLong(parts[3]);
-        Message message = new Message(parts[0], parts[1], parts[2], timestamp , parts[6]);
 
-        message.setEdited(Boolean.parseBoolean(parts[4]));
+    String[] parts = line.split("\\|");
 
-        message.setDeleted(Boolean.parseBoolean(parts[5]));
 
-        return message;
+    if(parts.length != 10)
+        return null;
+
+
+    Message message = new Message(
+            parts[0],
+            parts[1],
+            parts[2],
+            Long.parseLong(parts[3]),
+            parts[6]
+    );
+
+
+    message.setEdited(Boolean.parseBoolean(parts[4]));
+    message.setDeleted(Boolean.parseBoolean(parts[5]));
+
+
+    if(!parts[7].isEmpty())
+        message.setPreviousContent(parts[7]);
+
+
+    if(!parts[8].isEmpty())
+        message.setMediaUrl(parts[8]);
+
+
+    if(!parts[9].isEmpty()) {
+        message.setReportedBy(
+                new ArrayList<>(
+                        Arrays.asList(parts[9].split(","))
+                )
+        );
     }
+
+
+    return message;
+}
 
     private String generatePrivateChatId(String user1Id, String user2Id) {      //e.g. private_1_2
         int firstUserId = Integer.parseInt(user1Id);
@@ -152,7 +203,6 @@ public class ChatRepository {
         for(int i = 0 ; i< messages.size() ; i++) {
             if(messages.get(i).getId().equals(updatedMessage.getId())) {
                 messages.set(i, updatedMessage);
-                updatedMessage.setEdited(true);
                 break;
             }
         }

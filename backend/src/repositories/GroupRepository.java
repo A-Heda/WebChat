@@ -13,32 +13,51 @@ public class GroupRepository {
 
     private String serializeGroup(Group group) {
 
-        String membersJoinedId = String.join(",", group.getMemberIds());  // ["1" , "2" , "3"] --> 1,2,3 
+    String membersJoinedId = String.join(",", group.getMemberIds());
 
-        return group.getId() + "|" +
-                group.getName() + "|" +
-                group.getAdminId() + "|" +
-                membersJoinedId;
-    }
+    String image = group.getGroupImagePath() == null ?
+            "" : group.getGroupImagePath();
+
+    String description = group.getDescription() == null ?
+            "" : group.getDescription();
+
+
+    return group.getId() + "|" +
+            group.getName() + "|" +
+            group.getAdminId() + "|" +
+            membersJoinedId + "|" +
+            image + "|" +
+            description;
+}
 
     private Group deserializeGroup(String line) {
 
-        String[] parts = line.split("\\|");
+    String[] parts = line.split("\\|");
 
-        if(parts.length != 4) {
-            return null;
-        }
+    if(parts.length != 6)
+        return null;
 
-        String[] members = parts[3].split(",");
-        List<String> memberIds = new ArrayList<>(Arrays.asList(members));  //1,2,3 --> ["1" , "2" , "3"]
 
-        return new Group(
-                parts[0],
-                parts[1],
-                parts[2],
-                memberIds
-        );
+    List<String> memberIds = new ArrayList<>();
+
+    if(!parts[3].isEmpty()) {
+        memberIds.addAll(Arrays.asList(parts[3].split(",")));
     }
+
+
+    Group group = new Group(
+            parts[0],
+            parts[1],
+            parts[2],
+            memberIds
+    );
+
+
+    group.setGroupImagePath(parts[4]);
+    group.setDescription(parts[5]);
+
+    return group;
+}
 
     public void saveGroup (Group group) {
         try(BufferedWriter writer = new BufferedWriter(new FileWriter(GROUP_FILE, true))) {
