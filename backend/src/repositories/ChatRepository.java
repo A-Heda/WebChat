@@ -99,6 +99,10 @@ public class ChatRepository {
             return "private_" + secondUserId + "_" + firstUserId;
     }
 
+    public String getPrivateChatId(String user1Id, String user2Id) {
+    return generatePrivateChatId(user1Id, user2Id);
+    }
+
     private String getChatFilePath (String chatId) {          //e.g. database/chats/private_1_2.txt   
         return CHATS_DIRECTORY + chatId + ".txt";
     }

@@ -33,6 +33,31 @@ public class ChatService {
         return "Message is valid.";
     }
 
+    public String createPrivateChat(String user1Id, String user2Id) {
+    
+    if(user1Id == null || user2Id == null) {
+        return "User ID cannot be empty.";
+    }
+
+    if(user1Id.equals(user2Id)) {
+        return "You cannot create chat with yourself.";
+    }
+
+    if(chatRepository.chatExists(chatRepository.getPrivateChatId(user1Id , user2Id)))
+        return "Chat already exists.";
+
+    if(userRepository.findById(user1Id) == null)
+        return "First user not found.";
+
+    if(userRepository.findById(user2Id) == null)
+        return "Second user not found.";
+
+
+    chatRepository.createPrivateChatFile(user1Id, user2Id);
+
+    return "SUCCESS";
+}
+
 
     public String sendMessage(String chatId,
                               String senderId,

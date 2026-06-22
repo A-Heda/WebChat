@@ -126,7 +126,7 @@ public class GroupService {
     }
 
 
-    public String deleteGroup(String groupId, String adminId) {
+    public String deleteGroup(String groupId, String requesterId) {
 
         Group group = groupRepository.findById(groupId);
 
@@ -134,7 +134,7 @@ public class GroupService {
             return "Group not found.";
 
 
-        if(!group.getAdminId().equals(adminId))
+        if(!group.getAdminId().equals(requesterId))
             return "Only the admin can delete the group.";
 
 
