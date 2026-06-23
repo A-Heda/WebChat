@@ -1,0 +1,53 @@
+body {
+    margin: 0;
+    font-family: Arial;
+    background: #f3f5f7;
+}
+
+.container {
+    padding: 20px;
+}
+
+.header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.header button {
+    font-size: 20px;
+    border: none;
+    background: none;
+    cursor: pointer;
+}
+
+.profile {
+    text-align: center;
+    margin-top: 20px;
+}
+
+.profile img {
+    width: 90px;
+    height: 90px;
+    border-radius: 50%;
+}
+
+.actions {
+    margin-top: 25px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.actions button {
+    padding: 12px;
+    border: none;
+    border-radius: 10px;
+    background: #2563eb;
+    color: white;
+    cursor: pointer;
+}
+
+.actions button:hover {
+    opacity: 0.9;
+}

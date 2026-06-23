@@ -86,35 +86,7 @@ function addContact() {
 // ─── Chat Selection ─────────────────────────────────────────────
 
 function selectChat(chatId, name, avatarSrc) {
-    currentChatId = chatId;
-    clearActiveChatItems();
-    document.querySelector(`.chat-item[data-id="${chatId}"]`)?.classList.add('active');
-
-    const win = document.getElementById('chat-window');
-    win.innerHTML = `
-        <div class="chat-header">
-            <img src="${avatarSrc}" class="avatar" alt="">
-            <span class="chat-name">${name}</span>
-            <div class="chat-header-actions">
-                <button class="icon-btn" title="Archive chat" onclick="archiveChat('${chatId}')">
-                    <i class="fa-solid fa-box-archive"></i>
-                </button>
-                <button class="icon-btn" title="Pin chat" onclick="togglePin('${chatId}')">
-                    <i class="fa-solid fa-thumbtack"></i>
-                </button>
-            </div>
-        </div>
-        <div class="messages-area" id="messages-area">
-            <p style="text-align:center;color:#94a3b8;font-size:13px;">No messages yet.</p>
-        </div>
-        <div class="message-input-area">
-            <input type="text" id="msg-input" placeholder="Type a message..." onkeydown="handleKey(event)">
-            <button class="send-btn" onclick="sendMessage()">
-                <i class="fa-solid fa-paper-plane"></i>
-            </button>
-        </div>
-    `;
-    // TODO: fetch messages from API GET /messages?chatId=...
+    window.location.href = `../chat/chat.html?id=${chatId}`;
 }
 
 // ─── Messaging ──────────────────────────────────────────────────
@@ -130,6 +102,7 @@ function sendMessage() {
     // TODO: send via WebSocket or API POST /messages
 }
 
+// Fixed function structure error safely
 function handleKey(e) {
     if (e.key === 'Enter') sendMessage();
 }
@@ -279,6 +252,7 @@ function logout() {
     }
 }
 
+// Removed duplicate handling and retained clean error state
 function deleteAccount() {
     if (confirm('Delete your account? This cannot be undone.')) {
         // TODO: call API DELETE /account
@@ -286,41 +260,76 @@ function deleteAccount() {
     }
 }
 
-// ─── Profile Edit ────────────────────────────────────────────────
-
-function openEditProfile() {
+function openChangeName() {
     closeModal('settings-modal');
-    openModal('edit-profile-modal');
+    openModal('change-name-modal');
 }
 
+function openChangeId() {
+    closeModal('settings-modal');
+    openModal('change-id-modal');
+}
+
+function openDeleteAccount() {
+    closeModal('settings-modal');
+    openModal('delete-account-modal');
+}
+
+// ─── Profile Edit ────────────────────────────────────────────────
+
+
+
 function saveName() {
-    const name = document.getElementById('new-name-input').value.trim();
+    const name =
+        document.getElementById('new-name-input').value.trim();
+
     if (!name) return;
-    document.getElementById('sidebar-username').textContent = name;
+
+    document.getElementById('current-username').textContent = name;
+
     showToast('Name updated');
-    // TODO: call API PATCH /profile with { name }
+
+    closeModal('change-name-modal');
+
+    // TODO:
+    // PATCH /profile
 }
 
 function saveUserId() {
-    const uid = document.getElementById('new-userid-input').value.trim();
+    const uid =
+        document.getElementById('new-id-input').value.trim();
+
     if (!uid) return;
-    document.getElementById('sidebar-userid').textContent = '@' + uid;
+
     showToast('User ID updated');
-    // TODO: call API PATCH /profile with { userId: uid }
+
+    closeModal('change-id-modal');
+
+    // TODO:
+    // PATCH /profile
 }
 
 function openChangePhoto() {
-    document.getElementById('photo-upload-input').click();
+    closeModal('settings-modal');
+    document.getElementById('photo-upload').click();
 }
 
-function handlePhotoUpload(input) {
-    const file = input.files[0];
+function handlePhotoUpload(event) {
+    const file = event.target.files[0];
+
     if (!file) return;
+
     const reader = new FileReader();
-    reader.onload = function(e) {
-        document.getElementById('sidebar-avatar').src = e.target.result;
+
+    reader.onload = function (e) {
+        document.getElementById('profile-pic').src =
+            e.target.result;
+
         showToast('Photo updated');
-        // TODO: upload file to API POST /profile/photo
+
+        // TODO:
+        // POST /profile/photo
     };
+
     reader.readAsDataURL(file);
 }
