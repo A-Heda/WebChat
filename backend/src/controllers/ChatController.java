@@ -29,6 +29,15 @@ public class ChatController implements HttpHandler {
     @Override
     public void handle(HttpExchange exchange) throws IOException {
 
+    exchange.getResponseHeaders().add("Access-Control-Allow-Origin","*");      //اتصال فرانت به بک با فعال کردن CORS
+    exchange.getResponseHeaders().add("Access-Control-Allow-Headers","Content-Type");
+    exchange.getResponseHeaders().add("Access-Control-Allow-Methods","GET, POST, PUT, DELETE, OPTIONS");
+
+    if(exchange.getRequestMethod().equalsIgnoreCase("OPTIONS")) {
+        exchange.sendResponseHeaders(204, -1);
+        return;
+    }
+
         String method = exchange.getRequestMethod();
         String path = exchange.getRequestURI().getPath();
 
@@ -185,10 +194,10 @@ public class ChatController implements HttpHandler {
 
     String messageId = json.get("messageId").getAsString();
     
-    String userId = json.get("userId").getAsString();
+    String requesterId = json.get("requesterId").getAsString();
 
 
-    String result = chatService.deleteMessage(chatId, messageId , userId);
+    String result = chatService.deleteMessage(chatId, messageId , requesterId);
 
 
     if ("SUCCESS".equals(result)) {
@@ -214,6 +223,9 @@ public class ChatController implements HttpHandler {
     String chatId = query.substring("chatId=".length());
 
     List<Message> messages = chatService.getAllMessages(chatId);
+
+    if(messages == null)
+    sendResponse(exchange, "Chat not found.", 404);
 
     sendResponse(exchange, messages,200);
 }

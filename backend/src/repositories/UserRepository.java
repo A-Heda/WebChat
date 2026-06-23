@@ -8,7 +8,7 @@ import java.util.List;
 
 public class UserRepository {
 
-    private static final String USERS_FILE = "database/users.txt";
+    private static final String USERS_FILE = "backend/database/users.txt";
 
     private String serializeUser(User user) {
         return user.getId() + "|" +

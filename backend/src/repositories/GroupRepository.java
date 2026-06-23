@@ -9,7 +9,7 @@ import java.util.List;
 
 public class GroupRepository {
 
-    private static final String GROUP_FILE = "database/groups.txt";
+    private static final String GROUP_FILE = "backend/database/groups.txt";
 
     private String serializeGroup(Group group) {
 
