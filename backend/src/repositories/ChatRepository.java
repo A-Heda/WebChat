@@ -15,7 +15,7 @@ import java.util.Arrays;
 
 
 public class ChatRepository {
-    private static final String CHATS_DIRECTORY = "database/chats/";
+    private static final String CHATS_DIRECTORY = "backend/database/chats/";
 
     private String serializeMessage(Message message) {
 
