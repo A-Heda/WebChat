@@ -126,7 +126,7 @@ public class ChatController implements HttpHandler {
 
     JsonObject json = gson.fromJson(reader, JsonObject.class);
 
-    String messageId = json.get("messageId").getAsString();
+    //String messageId = json.get("messageId").getAsString();
 
     String senderId = json.get("senderId").getAsString();
 
