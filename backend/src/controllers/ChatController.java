@@ -185,10 +185,10 @@ public class ChatController implements HttpHandler {
 
     String messageId = json.get("messageId").getAsString();
     
-    String userId = json.get("userId").getAsString();
+    String requesterId = json.get("requesterId").getAsString();
 
 
-    String result = chatService.deleteMessage(chatId, messageId , userId);
+    String result = chatService.deleteMessage(chatId, messageId , requesterId);
 
 
     if ("SUCCESS".equals(result)) {
