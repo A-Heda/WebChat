@@ -2,6 +2,7 @@ package services;
 
 import model.Group;
 import model.User;
+import repositories.ChatRepository;
 import repositories.GroupRepository;
 import repositories.UserRepository;
 
@@ -12,11 +13,13 @@ public class GroupService {
 
     private GroupRepository groupRepository;
     private UserRepository userRepository;
+    private ChatRepository chatRepository;
 
 
     public GroupService() {
         groupRepository = new GroupRepository();
         userRepository = new UserRepository();
+        chatRepository = new ChatRepository();
     }
 
 
@@ -65,6 +68,7 @@ public class GroupService {
         Group group = new Group(id, name, adminId);
 
         groupRepository.saveGroup(group);
+        chatRepository.createGroupChatFile(id);
 
         return "SUCCESS";
     }

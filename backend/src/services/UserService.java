@@ -75,7 +75,7 @@ public class UserService {
             return "Password must contain at leat one Digit.";
         if(!hasSpecialCharacter)
             return "Password must contain at leat one Special character, like: @, #, $, !, ...";
-        if(password.toLowerCase().contains(username.toLowerCase())) 
+        if(password.contains(username)) 
             return "Password must not contain username";
         else
             return "Password is valid.";

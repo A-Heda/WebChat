@@ -1,6 +1,9 @@
 {
     "java.project.referencedLibraries": [
-        "lib/**/*.jar",
-        "src/lib/gson-2.11.0.jar"
+        "src\\lib\\gson-2.11.0.jar",
+        "c:\\Users\\Asus\\Desktop\\Web-Project\\backend\\src\\lib\\gson-2.11.0.jar"
+    ],
+    "java.project.sourcePaths": [
+        "src"
     ]
 }
