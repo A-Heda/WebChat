@@ -251,7 +251,7 @@ public class ChatService {
 
 
         if(!chatRepository.chatExists(chatId))
-            return new ArrayList<>();
+            return null;
 
 
         return chatRepository.getAllMessages(chatId);

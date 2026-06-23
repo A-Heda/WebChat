@@ -215,6 +215,9 @@ public class ChatController implements HttpHandler {
 
     List<Message> messages = chatService.getAllMessages(chatId);
 
+    if(messages == null)
+    sendResponse(exchange, "Chat not found.", 404);
+
     sendResponse(exchange, messages,200);
 }
 
