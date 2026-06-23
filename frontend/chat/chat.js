@@ -1,16 +1,11 @@
 const API = "http://localhost:8080";
 
-/* CHAT STATE */
-let currentChat = {
-    type: "private",
-    chatId: "1",
+const params = new URLSearchParams(window.location.search);
+const chatId = params.get("id");
 
-    username: "ali123",
-    fullName: "Ali",
-
-    groupName: "OOP Project",
-    membersCount: 8
-};
+/* STATE */
+let currentChat = null;
+let msgTimes = [];
 
 /* ELEMENTS */
 const chatName = document.getElementById("chat-name");
@@ -18,70 +13,87 @@ const chatSubtitle = document.getElementById("chat-subtitle");
 const menu = document.getElementById("chat-menu");
 const messagesContainer = document.getElementById("messages-container");
 const input = document.getElementById("message-input");
+const avatar = document.getElementById("chat-avatar");
 
-/* HEADER SETUP */
-if (currentChat.type === "private") {
+/* INIT */
+async function initChat() {
+    if (!chatId) return;
 
-    chatName.textContent = currentChat.fullName;
-    chatSubtitle.textContent = "@" + currentChat.username;
+    const res = await fetch(`${API}/chats/${chatId}`);
+    currentChat = await res.json();
 
-    menu.innerHTML = `
-        <button>Block User</button>
-        <button>Add To Contacts</button>
-        <button>Archive</button>
-    `;
-
-} else {
-
-    chatName.textContent = currentChat.groupName;
-    chatSubtitle.textContent = currentChat.membersCount + " members";
-
-    menu.innerHTML = `
-        <button>Leave Group</button>
-        <button>Add Member</button>
-        <button>Edit Group</button>
-        <button>History</button>
-        <button>Archive</button>
-    `;
+    renderHeader();
+    loadMessages();
 }
 
-/* MENU TOGGLE */
+function renderHeader() {
+
+    if (currentChat.type === "private") {
+
+        chatName.textContent = currentChat.fullName;
+        chatSubtitle.textContent = `@${currentChat.username} • last seen recently`;
+        avatar.src = currentChat.avatar || "../assets/default.png";
+
+        menu.innerHTML = `
+            <button>Block User</button>
+            <button>Add To Contacts</button>
+            <button>Archive</button>
+        `;
+
+    } else {
+
+        chatName.textContent = currentChat.groupName;
+        chatSubtitle.textContent = `${currentChat.membersCount} members`;
+        avatar.src = currentChat.groupAvatar || "../assets/default.png";
+
+        menu.innerHTML = `
+            <button>Leave Group</button>
+            <button>Add Member</button>
+            <button>Edit Group</button>
+            <button>History</button>
+            <button>Archive</button>
+        `;
+    }
+}
+
+/* MENU */
 document.getElementById("menu-button").onclick = () => {
     menu.classList.toggle("hidden");
 };
 
 /* BACK */
 document.getElementById("back-btn").onclick = () => {
-    window.history.back();
+    window.location.href = "../home/home.html";
 };
 
 /* HOME */
 document.getElementById("home-btn").onclick = () => {
-    window.location.href = "home.html";
+    window.location.href = "../home/home.html";
 };
 
 /* INFO PAGE */
 document.getElementById("open-info").onclick = () => {
 
+    if (!currentChat) return;
+
     if (currentChat.type === "private") {
-        window.location.href = `user-info.html?username=${currentChat.username}&id=${currentChat.chatId}`;
+        window.location.href = `user-info.html?username=${currentChat.username}&id=${chatId}`;
     } else {
-        window.location.href = `group-info.html?groupId=${currentChat.chatId}`;
+        window.location.href = `group-info.html?groupId=${chatId}`;
     }
 };
 
 /* LOAD MESSAGES */
 async function loadMessages() {
 
-    const res = await fetch(`${API}/chats/messages?chatId=${currentChat.chatId}`);
+    const res = await fetch(`${API}/chats/messages?chatId=${chatId}`);
     const data = await res.json();
 
     messagesContainer.innerHTML = "";
-
-    data.forEach(m => renderMessage(m));
+    data.forEach(renderMessage);
 }
 
-/* RENDER */
+/* RENDER MESSAGE */
 function renderMessage(msg) {
 
     const div = document.createElement("div");
@@ -94,23 +106,23 @@ function renderMessage(msg) {
     messagesContainer.appendChild(div);
 }
 
-/* SPAM CONTROL */
-let msgTimes = [];
-
+/* SPAM CONTROL (5 msg / 1 sec) */
 function canSend() {
     const now = Date.now();
-    msgTimes = msgTimes.filter(t => now - t < 5000);
+
+    msgTimes = msgTimes.filter(t => now - t < 1000);
+
     return msgTimes.length < 5;
 }
 
-/* SEND */
+/* SEND MESSAGE */
 async function sendMessage() {
 
     const text = input.value.trim();
     if (!text) return;
 
     if (!canSend()) {
-        alert("Too many messages");
+        alert("Too many messages (spam detected)");
         return;
     }
 
@@ -120,8 +132,7 @@ async function sendMessage() {
         method: "POST",
         headers: {"Content-Type": "application/json"},
         body: JSON.stringify({
-            chatId: currentChat.chatId,
-            senderId: "me",
+            chatId,
             text
         })
     });
@@ -130,14 +141,7 @@ async function sendMessage() {
     loadMessages();
 }
 
-/* EVENTS */
-document.getElementById("send-button").onclick = sendMessage;
-
-input.addEventListener("keypress", e => {
-    if (e.key === "Enter") sendMessage();
-});
-
-/* SEARCH */
+/* SEARCH MESSAGES */
 document.getElementById("search-box").addEventListener("input", e => {
 
     const value = e.target.value.toLowerCase();
@@ -150,5 +154,12 @@ document.getElementById("search-box").addEventListener("input", e => {
     });
 });
 
-/* INIT */
-loadMessages();
+/* EVENTS */
+document.getElementById("send-button").onclick = sendMessage;
+
+input.addEventListener("keypress", e => {
+    if (e.key === "Enter") sendMessage();
+});
+
+/* START */
+initChat();

@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Group Info</title>
+    <link rel="stylesheet" href="group-info.css">
+</head>
+<body>
+
+<div class="container">
+
+    <div class="header">
+        <button onclick="goBack()">←</button>
+        <h2>Group Info</h2>
+    </div>
+
+    <!-- GROUP PROFILE -->
+    <div class="profile">
+        <img id="avatar" src="../assets/group.png">
+
+        <h3 id="group-name">Group Name</h3>
+        <p id="group-id">Group ID: ---</p>
+        <p id="members">0 members</p>
+    </div>
+
+    <!-- ACTIONS -->
+    <div class="actions">
+
+        <button onclick="leaveGroup()">Leave Group</button>
+        <button onclick="addMember()">Add Member</button>
+        <button onclick="editGroup()">Edit Group</button>
+        <button onclick="openArchive()">Add to Archive</button>
+        <button onclick="openHistory()">History</button>
+
+    </div>
+
+</div>
+
+<script src="group-info.js"></script>
+</body>
+</html>
