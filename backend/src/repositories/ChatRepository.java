@@ -49,7 +49,7 @@ public class ChatRepository {
     private Message deserializeMessage(String line) {
 
 
-    String[] parts = line.split("\\|");
+    String[] parts = line.split("\\|" , -1);
 
 
     if(parts.length != 10)

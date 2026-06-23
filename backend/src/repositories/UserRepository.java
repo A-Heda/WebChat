@@ -19,7 +19,7 @@ public class UserRepository {
 
     private User deserializeUser(String line) {
 
-        String[] parts = line.split("\\|");
+        String[] parts = line.split("\\|" , -1);
 
         if(parts.length != 4) {
             return null;

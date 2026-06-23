@@ -32,7 +32,7 @@ public class GroupRepository {
 
     private Group deserializeGroup(String line) {
 
-    String[] parts = line.split("\\|");
+    String[] parts = line.split("\\|" , -1);
 
     if(parts.length != 6)
         return null;
