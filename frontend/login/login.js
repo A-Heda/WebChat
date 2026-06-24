@@ -50,9 +50,7 @@ async function login() {
                 data.username
             );
 
-            // رفتن به صفحه اصلی
-            window.location.href =
-                "../home/home.html";
+            window.location.href = "../home/home.html";
 
         } else {
 
