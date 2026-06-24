@@ -6,6 +6,7 @@ import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 
 import model.Message;
+import services.ChatPreview;
 import services.ChatService;
 
 import java.io.IOException;
@@ -98,6 +99,16 @@ public class ChatController implements HttpHandler {
                 }
 
                 break;
+
+            case "/chats/user":
+
+            if(method.equals("GET")) {
+                getUserChats(exchange);
+            } else {
+                sendResponse(exchange,"Method not allowed",405);
+            }
+
+            break;
 
 
             default:
@@ -228,6 +239,24 @@ public class ChatController implements HttpHandler {
     sendResponse(exchange, "Chat not found.", 404);
 
     sendResponse(exchange, messages,200);
+}
+
+
+
+    private void getUserChats(HttpExchange exchange) throws IOException {
+
+    String query = exchange.getRequestURI().getQuery();
+
+    if(query == null || !query.startsWith("userId=")) {
+        sendResponse(exchange,"Missing userId",400);
+        return;
+    }
+
+    String userId = query.substring("userId=".length());
+
+    List<ChatPreview> chats = chatService.getUserChats(userId);
+
+    sendResponse(exchange,chats,200);
 }
 
 

@@ -257,6 +257,38 @@ public class ChatService {
         return chatRepository.getAllMessages(chatId);
     }
 
+    public List<ChatPreview> getUserChats(String userId) {
+
+        List<ChatPreview> result = new ArrayList<>();
+
+        List<String> chats = chatRepository.getUserChats(userId);
+
+        for(String chatId : chats) {
+            String[] parts = chatId.split("_");
+
+            if(parts.length != 3)
+                continue;
+
+            String firstUser = parts[1];
+            String secondUser = parts[2];
+
+            String otherUserId;
+            if(firstUser.equals(userId))
+                otherUserId = secondUser;
+            else
+                otherUserId = firstUser;
+
+            User otherUser = userRepository.findById(otherUserId);
+
+            if(otherUser == null)
+                continue;
+
+            result.add(new ChatPreview(chatId,otherUserId,otherUser.getUsername()));
+    }
+
+    return result;
+}
+
 
     public List<Message> searchMessages(String chatId,
                                         String keyword) {

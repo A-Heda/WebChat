@@ -201,6 +201,27 @@ public class ChatRepository {
     return messages;
     }
 
+     public List<String> getUserChats(String userId) {
+
+        List<String> chats = new ArrayList<>();
+
+        File folder = new File(CHATS_DIRECTORY);
+
+        File[] files = folder.listFiles();
+
+        if(files == null)
+            return chats;
+
+        for(File file : files) {
+            String fileName = file.getName();
+            if(fileName.contains(userId)) {
+                String chatId = fileName.replace(".txt","");
+                chats.add(chatId);
+            }
+    }
+    return chats;
+}
+
     public void updateMessage (Message updatedMessage) {
         List<Message> messages = getAllMessages(updatedMessage.getChatId());
 
