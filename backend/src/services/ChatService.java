@@ -52,10 +52,10 @@ public class ChatService {
     if(userRepository.findById(user2Id) == null)
         return "Second user not found.";
 
-
+    String chatId = chatRepository.getPrivateChatId(user1Id, user2Id);
     chatRepository.createPrivateChatFile(user1Id, user2Id);
 
-    return "SUCCESS";
+    return chatId;
 }
 
 

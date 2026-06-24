@@ -27,11 +27,11 @@ public class UserController implements HttpHandler {
     @Override
     public void handle(HttpExchange exchange) throws IOException {
 
-    exchange.getResponseHeaders().add("Access-Control-Allow-Origin","*");      //اتصال فرانت به بک با فعال کردن CORS
-    exchange.getResponseHeaders().add("Access-Control-Allow-Headers","Content-Type");
-    exchange.getResponseHeaders().add("Access-Control-Allow-Methods","GET, POST, PUT, DELETE, OPTIONS");
+        exchange.getResponseHeaders().add("Access-Control-Allow-Origin","*");      //اتصال فرانت به بک با فعال کردن CORS
+        exchange.getResponseHeaders().add("Access-Control-Allow-Headers","Content-Type");
+        exchange.getResponseHeaders().add("Access-Control-Allow-Methods","GET, POST, PUT, DELETE, OPTIONS");
 
-    if(exchange.getRequestMethod().equalsIgnoreCase("OPTIONS")) {
+        if(exchange.getRequestMethod().equalsIgnoreCase("OPTIONS")) {
         exchange.sendResponseHeaders(204, -1);
         return;
     }
@@ -156,9 +156,13 @@ public class UserController implements HttpHandler {
 
     String result = userService.login(username, password);
 
-    if(result.equals("SUCCESS")) {
-        sendResponse(exchange, result, 200);
-    }
+    if("SUCCESS".equals(result)) {
+    User user = userService.findUserByUsername(username);
+    JsonObject response = new JsonObject();
+    response.addProperty("id", user.getId());
+    response.addProperty("username", user.getUsername());          //also sends userId&username via its response to frontend
+    sendResponse(exchange, response, 200);
+}
     else {
         sendResponse(exchange, result, 401);
     }
@@ -226,7 +230,7 @@ public class UserController implements HttpHandler {
         sendResponse(exchange, "User not found.", 404);
     }
     else {
-        sendResponse(exchange, gson.toJson(user), 200);
+        sendResponse(exchange, user , 200);
     }
 }
 
@@ -248,16 +252,16 @@ public class UserController implements HttpHandler {
     if (user == null) {
         sendResponse(exchange, "User not found.", 404);
     } else {
-        sendResponse(exchange, gson.toJson(user), 200);
+        sendResponse(exchange, user, 200);
     }
 }
 
 
     private void sendResponse(HttpExchange exchange,
-                          String message,
+                          Object obj,
                           int statusCode) throws IOException {
 
-    String jsonResponse = gson.toJson(message);
+    String jsonResponse = gson.toJson(obj);
 
     exchange.getResponseHeaders().set("Content-Type", "application/json");
 

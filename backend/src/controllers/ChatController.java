@@ -120,7 +120,7 @@ public class ChatController implements HttpHandler {
     String result = chatService.createPrivateChat(user1Id, user2Id);
 
 
-    if ("SUCCESS".equals(result)) {
+    if (result.startsWith("private_")) {          //means created succesfully
         sendResponse(exchange, result, 200);
     } else {
         sendResponse(exchange, result, 400);

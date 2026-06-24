@@ -1,17 +1,15 @@
-async function login(){
+async function login() {
 
-    const username =
-        document.getElementById("id").value;
+    const username = document.getElementById("username").value;
 
-    const password =
-        document.getElementById("password").value;
+    const password = document.getElementById("password").value;
 
-    if(id === ""){
+    if (username === "") {
         alert("Username is required.");
         return;
     }
 
-    if(password === ""){
+    if (password === "") {
         alert("Password is required.");
         return;
     }
@@ -34,26 +32,27 @@ async function login(){
             }
         );
 
-
         const data = await response.json();
-
 
         if (response.ok) {
 
             alert("Login successful!");
 
-            localStorage.setItem("username",username);
+            localStorage.setItem("userId",data.id);
 
-            window.location.href ="../chat/chat.html";
+            localStorage.setItem("username",data.username); 
+
+            window.location.href = "../chat/chat.html";
 
         } else {
-            alert(data);
-        }
 
+            alert(data);
+        
+        }
     } catch (error) {
 
         alert("Cannot connect to server.");
-
+        
         console.error(error);
     }
 }
