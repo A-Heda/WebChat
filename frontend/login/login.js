@@ -1,8 +1,10 @@
 async function login() {
 
-    const username = document.getElementById("username").value;
+    const username =
+        document.getElementById("username").value.trim();
 
-    const password = document.getElementById("password").value;
+    const password =
+        document.getElementById("password").value;
 
     if (username === "") {
         alert("Username is required.");
@@ -38,21 +40,30 @@ async function login() {
 
             alert("Login successful!");
 
-            localStorage.setItem("userId",data.id);
+            localStorage.setItem(
+                "userId",
+                data.id
+            );
 
-            localStorage.setItem("username",data.username); 
+            localStorage.setItem(
+                "username",
+                data.username
+            );
 
-            window.location.href = "../chat/chat.html";
+            // رفتن به صفحه اصلی
+            window.location.href =
+                "../home/home.html";
 
         } else {
 
             alert(data);
-        
+
         }
+
     } catch (error) {
 
         alert("Cannot connect to server.");
-        
+
         console.error(error);
     }
 }
