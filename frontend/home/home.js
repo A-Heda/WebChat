@@ -1,335 +1,151 @@
-let currentChatId = null;
-let isDarkMode = false;
+const API = "http://localhost:8080";
 
-// ─── Special Folders ───────────────────────────────────────────
+/*Elements*/
+const chatList = document.getElementById("chat-list");
 
-function openSavedMessages() {
-    currentChatId = '__saved__';
-    clearActiveChatItems();
+const contactInput = document.getElementById("contact-id-input");
 
-    const win = document.getElementById('chat-window');
-    win.innerHTML = `
-        <div class="chat-header">
-            <div class="folder-icon saved" style="width:38px;height:38px;font-size:15px;border-radius:50%;">
-                <i class="fa-solid fa-bookmark"></i>
-            </div>
-            <span class="chat-name">Saved Messages</span>
-            <div class="chat-header-actions">
-                <button class="icon-btn" title="Pin a message" onclick="togglePin('__saved__')">
-                    <i class="fa-solid fa-thumbtack"></i>
-                </button>
-            </div>
-        </div>
-        <div class="messages-area" id="messages-area">
-            <p style="text-align:center;color:#94a3b8;font-size:13px;">
-                Your saved notes and messages appear here.
-            </p>
-        </div>
-        <div class="message-input-area">
-            <input type="text" id="msg-input" placeholder="Save a note..." onkeydown="handleKey(event)">
-            <button class="send-btn" onclick="sendMessage()">
-                <i class="fa-solid fa-paper-plane"></i>
-            </button>
-        </div>
-    `;
-    // TODO: fetch saved messages from API GET /saved-messages
+/*Load chats when page opens*/
+window.onload = function () {
+
+    loadChats();
+};
+
+/*Get all chats of current user*/
+async function loadChats() {
+
+    const userId =
+        localStorage.getItem("userId");
+
+    if (!userId) {
+
+        alert("Please login first.");
+
+        window.location.href =
+            "../login/login.html";
+
+        return;
+    }
+
+    try {
+
+        const response =
+            await fetch(
+                API +
+                "/chats/user?userId=" +
+                userId
+            );
+
+        const chats =
+            await response.json();
+
+        renderChats(chats);
+
+    } catch (error) {
+
+        console.error(error);
+
+        alert("Cannot connect to server.");
+    }
 }
 
-function openArchive() {
-    currentChatId = '__archive__';
-    clearActiveChatItems();
+/*Render chats in sidebar*/
+function renderChats(chats) {
 
-    const win = document.getElementById('chat-window');
-    win.innerHTML = `
-        <div class="chat-header">
-            <div class="folder-icon archive" style="width:38px;height:38px;font-size:15px;border-radius:50%;">
-                <i class="fa-solid fa-box-archive"></i>
+    chatList.innerHTML = "";
+
+    chats.forEach(chat => {
+
+        const div =
+            document.createElement("div");
+
+        div.className =
+            "chat-item";
+
+        div.innerHTML =
+            `
+            <div>
+                ${chat.otherUsername}
             </div>
-            <span class="chat-name">Archive</span>
-        </div>
-        <div class="messages-area" id="archive-list" style="gap:0;padding:12px;">
-            <p style="text-align:center;color:#94a3b8;font-size:13px;margin-top:30px;">
-                Archived chats will appear here.
-            </p>
-        </div>
-    `;
-    // TODO: fetch archived chats from API GET /chats?archived=true
-}
+            `;
 
-function clearActiveChatItems() {
-    document.querySelectorAll('.chat-item').forEach(i => i.classList.remove('active'));
-}
+        div.onclick =
+            function () {
 
-// ─── Sidebar Search ─────────────────────────────────────────────
+                openChat(chat.chatId);
+            };
 
-function searchChats() {
-    const q = document.getElementById('search-input').value.toLowerCase();
-    document.querySelectorAll('.chat-item').forEach(item => {
-        item.style.display = item.dataset.name.toLowerCase().includes(q) ? '' : 'none';
+        chatList.appendChild(div);
     });
 }
 
-// ─── New Chat / Add Contact ─────────────────────────────────────
+/*Open selected chat*/
+function openChat(chatId) {
 
-function openNewChat() {
-    openModal('add-contact-modal');
+    window.location.href =
+        "../chat/chat.html?id=" +
+        chatId;
 }
 
-function addContact() {
-    const userId = document.getElementById('contact-id-input').value.trim();
-    if (!userId) return;
-    // TODO: call API POST /contacts with { userId }
-    closeModal('add-contact-modal');
-    document.getElementById('contact-id-input').value = '';
-}
+/*Create private chat*/
+async function createPrivateChat() {
 
-// ─── Chat Selection ─────────────────────────────────────────────
+    const otherUserId =
+        contactInput.value.trim();
 
-function selectChat(chatId, name, avatarSrc) {
-    window.location.href = `../chat/chat.html?id=${chatId}`;
-}
+    if (otherUserId === "") {
 
-// ─── Messaging ──────────────────────────────────────────────────
+        alert("Enter user id.");
 
-function sendMessage() {
-    const input = document.getElementById('msg-input');
-    const text = input.value.trim();
-    if (!text || !currentChatId) return;
-
-    const type = currentChatId === '__saved__' ? 'note' : 'sent';
-    appendMessage(text, type);
-    input.value = '';
-    // TODO: send via WebSocket or API POST /messages
-}
-
-// Fixed function structure error safely
-function handleKey(e) {
-    if (e.key === 'Enter') sendMessage();
-}
-
-function appendMessage(text, type) {
-    const area = document.getElementById('messages-area');
-    if (!area) return;
-    const emptyMsg = area.querySelector('p');
-    if (emptyMsg) emptyMsg.remove();
-
-    const div = document.createElement('div');
-    div.className = `message ${type}`;
-    const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-    div.innerHTML = `${text}<div class="msg-time">${time}</div>`;
-    area.appendChild(div);
-    area.scrollTop = area.scrollHeight;
-}
-
-// ─── Pin & Archive ──────────────────────────────────────────────
-
-function togglePin(chatId) {
-    const item = document.querySelector(`.chat-item[data-id="${chatId}"]`);
-    if (!item) return;
-
-    const isPinned = item.dataset.pinned === 'true';
-    item.dataset.pinned = isPinned ? 'false' : 'true';
-
-    // move pinned items to top of list
-    const list = document.getElementById('chat-list');
-    if (!isPinned) {
-        const pin = document.createElement('span');
-        pin.className = 'pin-indicator';
-        pin.innerHTML = '<i class="fa-solid fa-thumbtack" style="color:#6366f1;font-size:11px;"></i>';
-        pin.style.cssText = 'position:absolute;top:6px;right:8px;';
-        item.style.position = 'relative';
-        item.appendChild(pin);
-        list.prepend(item);
-    } else {
-        item.querySelector('.pin-indicator')?.remove();
-        item.style.position = '';
+        return;
     }
-    // TODO: call API PATCH /chats/:chatId with { pinned: !isPinned }
-}
 
-function archiveChat(chatId) {
-    const item = document.querySelector(`.chat-item[data-id="${chatId}"]`);
-    if (!item) return;
+    try {
 
-    item.style.transition = 'opacity 0.3s';
-    item.style.opacity = '0';
-    setTimeout(() => {
-        item.remove();
-        // show feedback
-        showToast('Chat archived');
-    }, 300);
-    // TODO: call API PATCH /chats/:chatId with { archived: true }
+        const response =
+            await fetch( API + "/chats/create-private",
+                {
+                    method: "POST",
 
-    // go back to empty state
-    document.getElementById('chat-window').innerHTML = `
-        <div class="empty-state">
-            <i class="fa-solid fa-comments" style="font-size:48px;color:#334155;margin-bottom:16px;"></i>
-            <p>Select a chat to start messaging</p>
-        </div>
-    `;
-    currentChatId = null;
-}
+                    headers: {
+                        "Content-Type":
+                            "application/json"
+                    },
 
-// ─── Toast Notification ─────────────────────────────────────────
+                    body: JSON.stringify({
 
-function showToast(message) {
-    const existing = document.querySelector('.toast');
-    if (existing) existing.remove();
+                        user1Id: localStorage.getItem("userId"),
 
-    const toast = document.createElement('div');
-    toast.className = 'toast';
-    toast.textContent = message;
-    toast.style.cssText = `
-        position: fixed;
-        bottom: 24px;
-        left: 50%;
-        transform: translateX(-50%);
-        background: #6366f1;
-        color: white;
-        padding: 10px 20px;
-        border-radius: 8px;
-        font-size: 13px;
-        z-index: 9999;
-        opacity: 0;
-        transition: opacity 0.3s;
-    `;
-    document.body.appendChild(toast);
-    requestAnimationFrame(() => toast.style.opacity = '1');
-    setTimeout(() => {
-        toast.style.opacity = '0';
-        setTimeout(() => toast.remove(), 300);
-    }, 2500);
-}
+                        user2Id: otherUserId
+                    })
+                }
+            );
 
-// ─── Modal Helpers ──────────────────────────────────────────────
+        const result = await response.json();
 
-function openModal(id) {
-    const modal = document.getElementById(id);
-    if (modal) {
-        modal.style.display = 'flex';
-        requestAnimationFrame(() => modal.classList.add('show'));
+        if (response.ok) {
+
+            contactInput.value = "";
+
+            loadChats();
+
+        } else {
+
+            alert(result);
+        }
+
+    } catch (error) {
+
+        console.error(error);
+
+        alert("Cannot connect to server.");
     }
 }
 
-function closeModal(id) {
-    const modal = document.getElementById(id);
-    if (modal) {
-        modal.classList.remove('show');
-        setTimeout(() => modal.style.display = 'none', 200);
-    }
-}
-
-// close modal when clicking backdrop
-document.addEventListener('click', function(e) {
-    if (e.target.classList.contains('modal-overlay')) {
-        closeModal(e.target.id);
-    }
-});
-
-// ─── Settings ───────────────────────────────────────────────────
-
-function openSettings() {
-    openModal('settings-modal');
-}
-
-function toggleDarkMode() {
-    isDarkMode = !isDarkMode;
-    document.body.classList.toggle('dark', isDarkMode);
-
-    const toggle = document.getElementById('dark-mode-toggle');
-    const icon = document.getElementById('dark-mode-icon');
-    const label = document.getElementById('dark-mode-label');
-
-    if (toggle) toggle.classList.toggle('on', isDarkMode);
-    if (icon) icon.className = isDarkMode ? 'fa-solid fa-sun' : 'fa-solid fa-moon';
-    if (label) label.textContent = isDarkMode ? 'Light Mode' : 'Dark Mode';
-}
-
+/*Logout*/
 function logout() {
-    if (confirm('Are you sure you want to logout?')) {
-        // TODO: call API POST /logout
-        window.location.href = '../login/login.html';
-    }
-}
 
-// Removed duplicate handling and retained clean error state
-function deleteAccount() {
-    if (confirm('Delete your account? This cannot be undone.')) {
-        // TODO: call API DELETE /account
-        window.location.href = '../signup/signup.html';
-    }
-}
+    localStorage.clear();
 
-function openChangeName() {
-    closeModal('settings-modal');
-    openModal('change-name-modal');
-}
-
-function openChangeId() {
-    closeModal('settings-modal');
-    openModal('change-id-modal');
-}
-
-function openDeleteAccount() {
-    closeModal('settings-modal');
-    openModal('delete-account-modal');
-}
-
-// ─── Profile Edit ────────────────────────────────────────────────
-
-
-
-function saveName() {
-    const name =
-        document.getElementById('new-name-input').value.trim();
-
-    if (!name) return;
-
-    document.getElementById('current-username').textContent = name;
-
-    showToast('Name updated');
-
-    closeModal('change-name-modal');
-
-    // TODO:
-    // PATCH /profile
-}
-
-function saveUserId() {
-    const uid =
-        document.getElementById('new-id-input').value.trim();
-
-    if (!uid) return;
-
-    showToast('User ID updated');
-
-    closeModal('change-id-modal');
-
-    // TODO:
-    // PATCH /profile
-}
-
-function openChangePhoto() {
-    closeModal('settings-modal');
-    document.getElementById('photo-upload').click();
-}
-
-function handlePhotoUpload(event) {
-    const file = event.target.files[0];
-
-    if (!file) return;
-
-    const reader = new FileReader();
-
-    reader.onload = function (e) {
-        document.getElementById('profile-pic').src =
-            e.target.result;
-
-        showToast('Photo updated');
-
-        // TODO:
-        // POST /profile/photo
-    };
-
-    reader.readAsDataURL(file);
+    window.location.href = "../login/login.html";
 }
