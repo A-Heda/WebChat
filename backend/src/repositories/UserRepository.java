@@ -122,4 +122,20 @@ public class UserRepository {
             e.printStackTrace();
         }
     }
+
+    public void overwriteUsers(List<User> users) {
+
+    try(BufferedWriter writer =
+                new BufferedWriter(
+                        new FileWriter(USERS_FILE))) {
+
+        for(User user : users) {
+            writer.write(serializeUser(user));
+            writer.newLine();
+        }
+
+    } catch(IOException e) {
+        e.printStackTrace();
+    }
+}
 }
