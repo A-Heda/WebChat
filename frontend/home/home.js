@@ -8,8 +8,24 @@ const contactInput = document.getElementById("contact-id-input");
 /*Load chats when page opens*/
 window.onload = function () {
 
+    loadUserInfo();
+
     loadChats();
 };
+
+function loadUserInfo() {
+
+    const username =
+        localStorage.getItem("username");
+
+    const label =
+        document.getElementById("current-username");
+
+    if (label) {
+        label.textContent = username;
+    }
+}
+
 
 /*Get all chats of current user*/
 async function loadChats() {
@@ -53,6 +69,14 @@ async function loadChats() {
 function renderChats(chats) {
 
     chatList.innerHTML = "";
+
+    if(chats.length === 0) {
+
+        chatList.innerHTML =
+            "<p class='empty-msg'>No chats yet.</p>";
+
+        return;
+    }
 
     chats.forEach(chat => {
 
@@ -127,8 +151,9 @@ async function createPrivateChat() {
 
             contactInput.value = "";
 
-            loadChats();
+            closeModal("add-contact-modal");
 
+            loadChats();
         } else {
 
             alert(result);
@@ -148,4 +173,42 @@ function logout() {
     localStorage.clear();
 
     window.location.href = "../login/login.html";
+}
+
+function openSavedMessages() {
+
+    alert("Coming Soon");
+}
+
+function openSettings() {
+
+    openModal("settings-modal");
+}
+
+function closeModal(id) {
+
+    const modal =
+        document.getElementById(id);
+
+    if(modal)
+        modal.style.display = "none";
+}
+
+function openModal(id) {
+
+    const modal =
+        document.getElementById(id);
+
+    if(modal)
+        modal.style.display = "flex";
+}
+
+function openArchive() {
+
+    alert("Coming Soon");
+}
+
+function openNewChat() {
+
+    openModal("add-contact-modal");
 }

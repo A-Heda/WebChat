@@ -42,7 +42,7 @@ async function login() {
 
             localStorage.setItem("username",data.username); 
 
-            window.location.href = "../chat/chat.html";
+            window.location.href = "../home/home.html";
 
         } else {
 
