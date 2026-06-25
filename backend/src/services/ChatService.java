@@ -289,6 +289,36 @@ public class ChatService {
     return result;
 }
 
+    public ChatPreview getChatInfo(
+        String chatId,
+        String currentUserId) {
+
+    if(!chatRepository.chatExists(chatId))
+        return null;
+
+    String[] parts = chatId.split("_");
+
+    if(parts.length != 3)
+        return null;
+
+    String firstUser = parts[1];
+    String secondUser = parts[2];
+
+    String otherUserId;
+
+    if(firstUser.equals(currentUserId))
+        otherUserId = secondUser;
+    else
+        otherUserId = firstUser;
+
+    User otherUser = userRepository.findById(otherUserId);
+
+    if(otherUser == null)
+        return null;
+
+    return new ChatPreview(chatId,otherUserId,otherUser.getUsername());
+}
+
 
     public List<Message> searchMessages(String chatId,
                                         String keyword) {

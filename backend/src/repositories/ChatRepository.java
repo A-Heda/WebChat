@@ -261,4 +261,15 @@ public class ChatRepository {
         updateMessage(message);
         }
     }
+
+    public boolean deleteGroupChatFile(String groupId) {
+        String chatId = "group_" + groupId;
+        File chatFile = new File(getChatFilePath(chatId));
+    
+        if (chatFile.exists()) {
+            return chatFile.delete();
+        }
+    return false;
+    }
+
 }

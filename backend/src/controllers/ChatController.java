@@ -110,6 +110,16 @@ public class ChatController implements HttpHandler {
 
             break;
 
+            case "/chats/info":
+
+            if(method.equals("GET")) {
+                getChatInfo(exchange);
+            } else {
+                sendResponse(exchange,"Method not allowed", 405);
+            }
+
+            break;
+
 
             default:
                 sendResponse(exchange,"Route not found", 404);
@@ -257,6 +267,38 @@ public class ChatController implements HttpHandler {
     List<ChatPreview> chats = chatService.getUserChats(userId);
 
     sendResponse(exchange,chats,200);
+}
+
+
+    //GET /chats/info?chatId=private_1_2&userId=1
+    private void getChatInfo(HttpExchange exchange) throws IOException {
+
+    String query = exchange.getRequestURI().getQuery();
+
+    String chatId = null;
+    String userId = null;
+
+    String[] params = query.split("&");
+
+    for(String param : params) {
+
+        if(param.startsWith("chatId="))
+            chatId = param.substring(7);
+
+        if(param.startsWith("userId="))
+            userId = param.substring(7);
+    }
+
+    ChatPreview info = chatService.getChatInfo(chatId,userId);
+
+    if(info == null) {
+
+        sendResponse(exchange,"Chat not found.",404);
+
+        return;
+    }
+
+    sendResponse(exchange,info,200);
 }
 
 

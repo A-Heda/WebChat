@@ -88,4 +88,24 @@ public class AdminService {
                 groupId,
                 userId);
     }
+
+    public String createGroup(String id, String name, String adminId) {
+    return groupService.createGroup(id, name, adminId);
+    }
+
+    public String deleteGroup(String groupId) {
+        try {
+            Group group = groupRepository.findById(groupId);
+            if (group == null) {
+                return "Group not found";
+            }
+        
+            groupRepository.deleteGroup(groupId);
+            chatRepository.deleteGroupChatFile(groupId);
+        
+            return "Group deleted successfully";
+        } catch (Exception e) {
+        return "Error deleting group: " + e.getMessage();
+        }
+    }
 }
