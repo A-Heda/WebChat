@@ -1,6 +1,7 @@
 package controllers;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
@@ -12,6 +13,7 @@ import services.ChatService;
 import java.io.IOException;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
 import java.util.List;
 
 
@@ -116,6 +118,16 @@ public class ChatController implements HttpHandler {
                 getChatInfo(exchange);
             } else {
                 sendResponse(exchange,"Method not allowed", 405);
+            }
+
+            break;
+
+            case "/chsts/cerate-group" :
+
+            if(method.equals("POST")) {
+                createGroup(exchange);
+            } else {
+                sendResponse(exchange , "Method not allowed" , 405);
             }
 
             break;
@@ -319,4 +331,34 @@ public class ChatController implements HttpHandler {
 
     exchange.getResponseBody().close();
 }
+
+    private void createGroup(HttpExchange exchange) throws IOException {
+
+        BufferedReader reader = new BufferedReader(new InputStreamReader(exchange.getRequestBody()));
+
+        JsonObject json = gson.fromJson(reader, JsonObject.class);
+
+        String groupId = json.get("groupId").getAsString();
+
+        String groupName = json.get("groupName").getAsString();
+               
+        String adminId = json.get("adminId").getAsString();
+
+        List<String> memberIds = new ArrayList<>();
+
+        JsonArray members = json.getAsJsonArray("memberIds");
+
+        for(int i = 0 ; i < members.size() ; i++) {
+            memberIds.add(members.get(i).getAsString());
+        }
+
+        String result = chatService.createGroupChat(groupId, groupName, adminId, memberIds);
+
+        if(result.startsWith("group_")) {
+            sendResponse(exchange,result,200);
+        } else {
+            sendResponse(exchange,result,400);
+        }
+        
+    }
 }

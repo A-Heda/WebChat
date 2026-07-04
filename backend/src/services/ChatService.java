@@ -2,7 +2,9 @@ package services;
 
 import model.Message;
 import model.User;
+import model.Group;
 import repositories.ChatRepository;
+import repositories.GroupRepository;
 import repositories.UserRepository;
 
 import java.util.ArrayList;
@@ -14,11 +16,13 @@ public class ChatService {
 
     private ChatRepository chatRepository;
     private UserRepository userRepository;
+    private GroupRepository groupRepository;
 
 
     public ChatService() {
         chatRepository = new ChatRepository();
         userRepository = new UserRepository();
+        groupRepository = new GroupRepository();
     }
 
 
@@ -257,34 +261,47 @@ public class ChatService {
         return chatRepository.getAllMessages(chatId);
     }
 
-    public List<ChatPreview> getUserChats(String userId) {
+    public List<ChatPreview> getPrivateChats(String userId) {
 
         List<ChatPreview> result = new ArrayList<>();
 
-        List<String> chats = chatRepository.getUserChats(userId);
+        List<String> chats = chatRepository.getPrivateChats(userId);
 
         for(String chatId : chats) {
             String[] parts = chatId.split("_");
-
-            if(parts.length != 3)
-                continue;
-
             String firstUser = parts[1];
             String secondUser = parts[2];
-
-            String otherUserId;
-            if(firstUser.equals(userId))
-                otherUserId = secondUser;
-            else
-                otherUserId = firstUser;
+            String otherUserId = firstUser.equals(userId) ? secondUser : firstUser;
 
             User otherUser = userRepository.findById(otherUserId);
 
             if(otherUser == null)
                 continue;
 
-            result.add(new ChatPreview(chatId,otherUserId,otherUser.getUsername()));
-    }
+            result.add(new ChatPreview(chatId, otherUserId, otherUser.getUsername(), "PRIVATE"));
+        }
+
+    return result;
+}
+
+    public List<ChatPreview> getGroupChats (String userId) {
+
+        List<ChatPreview> result = new ArrayList<>();
+        List<Group> groups = groupRepository.getUserGroups(userId);
+
+        for(Group group : groups) {
+            result.add(new ChatPreview("group_" + group.getId(), group.getId(), group.getName(), "GROUP"));
+        }
+
+    return result;
+}
+
+    public List<ChatPreview> getUserChats(String userId){
+
+        List<ChatPreview> result = new ArrayList<>();
+        result.addAll(getPrivateChats(userId));
+
+        result.addAll(getGroupChats(userId));
 
     return result;
 }
@@ -316,7 +333,7 @@ public class ChatService {
     if(otherUser == null)
         return null;
 
-    return new ChatPreview(chatId,otherUserId,otherUser.getUsername());
+    return new ChatPreview(chatId,otherUserId,otherUser.getUsername());        //undone, need to decide about chatPreview
 }
 
 
@@ -350,5 +367,36 @@ public class ChatService {
 
 
         return result;
+    }
+
+public String createGroupChat(String groupId, String groupName, String adminId, List<String> memberIds) {
+
+    if(groupId == null || groupId.trim().isEmpty())
+        return "Group ID is required.";
+    
+
+    if(groupName == null || groupName.trim().isEmpty())
+        return "Group name is required.";
+
+    if(userRepository.findById(adminId) == null)
+        return "Admin not found.";
+
+    if(groupRepository.findById(groupId) != null)
+        return "Group ID already exists.";
+
+    for(String id : memberIds) {
+        if(userRepository.findById(id) == null)
+            return "User " + id + " not found.";
+    }
+
+    if(!memberIds.contains(adminId))          
+        memberIds.add(adminId);
+
+    Group group = new Group(groupId, groupName, adminId, memberIds);
+
+    chatRepository.createGroupChatFile(groupId);
+    groupRepository.saveGroup(group);
+
+    return "group_" + groupId;
     }
 }

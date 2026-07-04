@@ -146,4 +146,18 @@ public class GroupRepository {
             e.printStackTrace();
         }
     }
+
+    public List<Group> getUserGroups(String userId){
+
+        List<Group> result = new ArrayList<>();
+        List<Group> groups = getAllGroups();
+
+        for(Group group : groups) {
+            if(group.getMemberIds().contains(userId)) {
+            result.add(group);
+            }
+        }
+    return result;
+    }
+    
 }

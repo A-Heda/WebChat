@@ -200,12 +200,10 @@ public class ChatRepository {
     return messages;
     }
 
-     public List<String> getUserChats(String userId) {
+     public List<String> getPrivateChats(String userId) {
 
         List<String> chats = new ArrayList<>();
-
         File folder = new File(CHATS_DIRECTORY);
-
         File[] files = folder.listFiles();
 
         if(files == null)
@@ -213,13 +211,14 @@ public class ChatRepository {
 
         for(File file : files) {
             String fileName = file.getName();
-            if(fileName.contains(userId)) {
-                String chatId = fileName.replace(".txt","");
-                chats.add(chatId);
+            if(!fileName.startsWith("private_"))
+                continue;
+            if(fileName.contains(userId)){
+                chats.add(fileName.replace(".txt",""));
             }
+        }
+        return chats;
     }
-    return chats;
-}
 
     public void updateMessage (Message updatedMessage) {
         List<Message> messages = getAllMessages(updatedMessage.getChatId());
