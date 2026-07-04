@@ -89,14 +89,13 @@ public class ChatRepository {
     return message;
 }
 
-    private String generatePrivateChatId(String user1Id, String user2Id) {      //e.g. private_1_2
-        int firstUserId = Integer.parseInt(user1Id);
-        int secondUserId = Integer.parseInt(user2Id);
+    private String generatePrivateChatId(String user1Id,String user2Id) {
 
-        if (firstUserId < secondUserId)
-            return "private_" + firstUserId + "_" + secondUserId;
-        else
-            return "private_" + secondUserId + "_" + firstUserId;
+        if(user1Id.compareTo(user2Id) < 0) {
+            return "private_" + user1Id + "_" + user2Id;
+        }
+
+        return "private_" + user2Id + "_" + user1Id;
     }
 
     public String getPrivateChatId(String user1Id, String user2Id) {
