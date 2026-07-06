@@ -122,15 +122,15 @@ public class ChatController implements HttpHandler {
 
             break;
 
-            case "/chsts/cerate-group" :
+            // case "/chsts/cerate-group" :                   added the group creation feature to group controller
 
-            if(method.equals("POST")) {
-                createGroup(exchange);
-            } else {
-                sendResponse(exchange , "Method not allowed" , 405);
-            }
+            // if(method.equals("POST")) {
+            //     createGroup(exchange);
+            // } else {
+            //     sendResponse(exchange , "Method not allowed" , 405);
+            // }
 
-            break;
+            // break;
 
 
             default:
@@ -313,6 +313,36 @@ public class ChatController implements HttpHandler {
     sendResponse(exchange,info,200);
 }
 
+// private void createGroup(HttpExchange exchange) throws IOException {
+
+//         BufferedReader reader = new BufferedReader(new InputStreamReader(exchange.getRequestBody()));
+
+//         JsonObject json = gson.fromJson(reader, JsonObject.class);
+
+//         String groupId = json.get("groupId").getAsString();
+
+//         String groupName = json.get("groupName").getAsString();
+               
+//         String adminId = json.get("adminId").getAsString();
+
+//         List<String> memberIds = new ArrayList<>();
+
+//         JsonArray members = json.getAsJsonArray("memberIds");
+
+//         for(int i = 0 ; i < members.size() ; i++) {
+//             memberIds.add(members.get(i).getAsString());
+//         }
+
+//         String result = chatService.createGroupChat(groupId, groupName, adminId, memberIds);
+
+//         if(result.startsWith("group_")) {
+//             sendResponse(exchange,result,200);
+//         } else {
+//             sendResponse(exchange,result,400);
+//         }
+        
+//     }
+
 
     private void sendResponse(HttpExchange exchange,
                           Object data,
@@ -332,33 +362,4 @@ public class ChatController implements HttpHandler {
     exchange.getResponseBody().close();
 }
 
-    private void createGroup(HttpExchange exchange) throws IOException {
-
-        BufferedReader reader = new BufferedReader(new InputStreamReader(exchange.getRequestBody()));
-
-        JsonObject json = gson.fromJson(reader, JsonObject.class);
-
-        String groupId = json.get("groupId").getAsString();
-
-        String groupName = json.get("groupName").getAsString();
-               
-        String adminId = json.get("adminId").getAsString();
-
-        List<String> memberIds = new ArrayList<>();
-
-        JsonArray members = json.getAsJsonArray("memberIds");
-
-        for(int i = 0 ; i < members.size() ; i++) {
-            memberIds.add(members.get(i).getAsString());
-        }
-
-        String result = chatService.createGroupChat(groupId, groupName, adminId, memberIds);
-
-        if(result.startsWith("group_")) {
-            sendResponse(exchange,result,200);
-        } else {
-            sendResponse(exchange,result,400);
-        }
-        
-    }
 }

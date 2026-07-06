@@ -278,7 +278,8 @@ public class ChatService {
             if(otherUser == null)
                 continue;
 
-            result.add(new ChatPreview(chatId, otherUserId, otherUser.getUsername(), "PRIVATE"));
+            result.add(new ChatPreview(chatId, otherUserId, otherUser.getUsername(),
+                        otherUser.getProfileImagePath(), "PRIVATE"));
         }
 
     return result;
@@ -290,7 +291,8 @@ public class ChatService {
         List<Group> groups = groupRepository.getUserGroups(userId);
 
         for(Group group : groups) {
-            result.add(new ChatPreview("group_" + group.getId(), group.getId(), group.getName(), "GROUP"));
+            result.add(new ChatPreview("group_" + group.getId(),group.getId() , group.getName(),
+            group.getGroupImagePath(), "GROUP"));
         }
 
     return result;
@@ -306,7 +308,19 @@ public class ChatService {
     return result;
 }
 
-    public ChatPreview getChatInfo(
+    public ChatPreview getGroupChatInfo(String chatId) {
+
+        String groupId = chatId.substring("group_".length());
+        Group group = groupRepository.findById(groupId);
+
+        if(group == null)
+            return null;
+
+        return new ChatPreview(chatId, group.getId(), group.getName(),
+            group.getGroupImagePath(), "GROUP");
+}
+
+    public ChatPreview getPrivateChatInfo(
         String chatId,
         String currentUserId) {
 
@@ -333,7 +347,19 @@ public class ChatService {
     if(otherUser == null)
         return null;
 
-    return new ChatPreview(chatId,otherUserId,otherUser.getUsername());        //undone, need to decide about chatPreview
+    return new ChatPreview(chatId, otherUserId ,otherUser.getUsername(),
+        otherUser.getProfileImagePath(), "PRIVATE");
+}
+
+    public ChatPreview getChatInfo(String chatId, String currentUserId) {     
+
+        if(chatId.startsWith("private_")) 
+            return getPrivateChatInfo(chatId, currentUserId);
+        
+        if(chatId.startsWith("group_")) 
+            return getGroupChatInfo(chatId);
+
+    return null;
 }
 
 

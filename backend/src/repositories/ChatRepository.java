@@ -219,6 +219,7 @@ public class ChatRepository {
         }
         return chats;
     }
+    
 
     public void updateMessage (Message updatedMessage) {
         List<Message> messages = getAllMessages(updatedMessage.getChatId());

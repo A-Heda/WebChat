@@ -1,22 +1,29 @@
 package controllers;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import services.GroupService;
 import model.Group;
+import services.ChatPreview;
+import services.ChatService;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.List;
 
 public class GroupController implements HttpHandler {
 
     private GroupService groupService;
     private Gson gson;
+    private ChatService chatService;
 
     public GroupController() {
+        chatService = new ChatService();
         groupService = new GroupService();
         gson = new Gson();
     }
@@ -43,6 +50,16 @@ public class GroupController implements HttpHandler {
                 if (method.equals("POST")) {
                     createGroup(exchange);
                 } else {
+                    sendResponse(exchange, "Method not allowed", 405);
+                }
+                break;
+
+            case "/groups/info":
+
+                if(method.equals("GET")) {
+                    getGroupChatInfo(exchange);
+                }
+                else {
                     sendResponse(exchange, "Method not allowed", 405);
                 }
                 break;
@@ -128,16 +145,27 @@ public class GroupController implements HttpHandler {
         JsonObject json = gson.fromJson(reader, JsonObject.class);
 
         String groupId = json.get("groupId").getAsString();
+
         String groupName = json.get("groupName").getAsString();
+               
         String adminId = json.get("adminId").getAsString();
 
-        String result = groupService.createGroup(groupId, groupName, adminId);
+        List<String> memberIds = new ArrayList<>();
 
-        if("SUCCESS".equals(result)) {
-            sendResponse(exchange, result, 200);
-        } else {
-            sendResponse(exchange, result, 400);
+        JsonArray members = json.getAsJsonArray("memberIds");
+
+        for(int i = 0 ; i < members.size() ; i++) {
+            memberIds.add(members.get(i).getAsString());
         }
+
+        String result = chatService.createGroupChat(groupId, groupName, adminId, memberIds);
+
+        if(result.startsWith("group_")) {
+            sendResponse(exchange,result,200);
+        } else {
+            sendResponse(exchange,result,400);
+        }
+        
     }
 
     private void addMember(HttpExchange exchange) throws IOException {
@@ -289,5 +317,26 @@ public class GroupController implements HttpHandler {
         exchange.getResponseBody().write(responseBytes);
 
         exchange.getResponseBody().close();
+    }
+
+    private void getGroupChatInfo (HttpExchange exchange) throws IOException {
+        String query = exchange.getRequestURI().getQuery();
+
+        if(query == null || !query.startsWith("groupId=")) {
+            sendResponse(exchange, "Missing groupId parameter.", 400);
+            return;
+        }
+
+        String groupId = query.substring("groupId=".length());
+
+        String chatId = "group_" + groupId;
+
+        ChatPreview result = chatService.getGroupChatInfo(chatId);
+
+        if (result == null) {
+            sendResponse(exchange, "Group not found.", 404);
+        } else {
+            sendResponse(exchange, result, 200);
+        }
     }
 }
