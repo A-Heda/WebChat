@@ -1,5 +1,7 @@
 const API = "http://localhost:8080";
 
+let lastMessageCount = 0;
+
 const params =
     new URLSearchParams(window.location.search);
 
@@ -46,6 +48,8 @@ window.onload = async function () {
     await loadChatInfo();
 
     await loadMessages();
+
+    setInterval(loadMessages, 3000);
 };
 
 /* Load Chat Header */
@@ -109,7 +113,12 @@ async function loadMessages() {
 
         if (response.ok) {
 
+            if (messages.length !== lastMessageCount) {
+
+            lastMessageCount = messages.length;
+        
             renderMessages(messages);
+            }
 
         } else {
 
