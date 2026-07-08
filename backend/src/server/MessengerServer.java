@@ -4,6 +4,7 @@ import com.sun.net.httpserver.HttpServer;
 import controllers.UserController;
 import controllers.GroupController;
 import controllers.ChatController;
+import controllers.ContactController;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -22,6 +23,8 @@ public class MessengerServer {
 
             
             server.createContext("/chats",new ChatController());
+
+            server.createContext("/contacts", new ContactController());
             
             server.setExecutor(Executors.newFixedThreadPool(10));
             server.start();
