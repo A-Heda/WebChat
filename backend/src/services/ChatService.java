@@ -47,9 +47,6 @@ public class ChatService {
         return "You cannot create chat with yourself.";
     }
 
-    if(chatRepository.chatExists(chatRepository.getPrivateChatId(user1Id , user2Id)))
-        return "Chat already exists.";
-
     if(userRepository.findById(user1Id) == null)
         return "First user not found.";
 
@@ -57,6 +54,10 @@ public class ChatService {
         return "Second user not found.";
 
     String chatId = chatRepository.getPrivateChatId(user1Id, user2Id);
+
+    if(chatRepository.chatExists(chatRepository.getPrivateChatId(user1Id , user2Id)))
+        return chatId;
+
     chatRepository.createPrivateChatFile(user1Id, user2Id);
 
     return chatId;

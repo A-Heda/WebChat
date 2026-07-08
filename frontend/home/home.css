@@ -616,3 +616,169 @@ body.dark .archive-badge {
     background: #334155;
     color: #94a3b8;
 }
+
+body.dark .contacts-modal{
+    background:#1e293b;
+}
+
+body.dark .contacts-header{
+    border-bottom:1px solid #334155;
+}
+
+body.dark .contacts-header h3{
+    color:white;
+}
+
+body.dark .contacts-header button{
+    color:#cbd5e1;
+}
+
+body.dark .contact-item:hover{
+    background:#334155;
+}
+
+body.dark .chat-id{
+    color:#94a3b8;
+}
+
+body.dark .contacts-actions{
+    border-top:1px solid #334155;
+}
+
+body.dark .group-members-list{
+    border-color:#334155;
+}
+
+body.dark .group-member{
+    border-bottom-color:#334155;
+}
+
+/* ===========================
+   Contacts Modal
+=========================== */
+
+.contacts-modal {
+    width: 420px;
+    max-height: 80vh;
+    background: #fff;
+    border-radius: 16px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.contacts-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 18px 20px;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.contacts-header h3{
+    font-size:18px;
+    color:#1e293b;
+}
+
+.contacts-header button{
+    border:none;
+    background:none;
+    cursor:pointer;
+    font-size:20px;
+    color:#64748b;
+}
+
+#contacts-list{
+    flex:1;
+    overflow-y:auto;
+    max-height:400px;
+}
+
+.contact-item{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    padding:12px 18px;
+    cursor:pointer;
+    transition:.15s;
+}
+
+.contact-item:hover{
+    background:#f8fafc;
+}
+
+.contact-item img{
+    width:46px;
+    height:46px;
+    border-radius:50%;
+    object-fit:cover;
+}
+
+.chat-id{
+    font-size:12px;
+    color:#94a3b8;
+    margin-top:3px;
+}
+
+.contacts-actions{
+    display:flex;
+    justify-content:space-between;
+    gap:10px;
+    padding:16px;
+    border-top:1px solid #e2e8f0;
+}
+
+.contacts-actions button{
+    flex:1;
+    border:none;
+    border-radius:10px;
+    padding:10px;
+    background:#2563eb;
+    color:white;
+    cursor:pointer;
+    font-size:14px;
+    font-weight:600;
+}
+
+.contacts-actions button:hover{
+    background:#1d4ed8;
+}
+
+/* ===========================
+   Group Modal
+=========================== */
+
+.group-modal{
+    width:420px;
+}
+
+.group-members-list{
+    margin-top:15px;
+    max-height:260px;
+    overflow-y:auto;
+    border:1px solid #e2e8f0;
+    border-radius:10px;
+}
+
+.group-member{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    padding:10px 14px;
+    border-bottom:1px solid #f1f5f9;
+}
+
+.group-member:last-child{
+    border-bottom:none;
+}
+
+.group-member img{
+    width:40px;
+    height:40px;
+    border-radius:50%;
+}
+
+.group-member input[type="checkbox"]{
+    margin-left:auto;
+    transform:scale(1.2);
+}
