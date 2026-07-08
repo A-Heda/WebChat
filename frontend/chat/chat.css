@@ -149,3 +149,95 @@ button {
     border-radius: 10px;
     cursor: pointer;
 }
+
+.message-body{
+
+    position:relative;
+
+}
+
+.menu-btn{
+
+    position:absolute;
+
+    top:0;
+
+    right:-5px;
+
+    border:none;
+
+    background:none;
+
+    cursor:pointer;
+
+    font-size:18px;
+
+    display:none;
+
+}
+
+.message:hover .menu-btn{
+
+    display:block;
+
+}
+
+.message-menu{
+
+    position:absolute;
+
+    right:0;
+
+    top:25px;
+
+    background:white;
+
+    border:1px solid #ccc;
+
+    border-radius:8px;
+
+    min-width:120px;
+
+    z-index:100;
+
+    box-shadow:0 2px 10px rgba(0,0,0,.2);
+
+}
+
+.message-menu div{
+
+    padding:10px;
+
+    cursor:pointer;
+
+}
+
+.message-menu div:hover{
+
+    background:#f2f2f2;
+
+}
+
+.hidden{
+
+    display:none;
+
+}
+
+.edited{
+
+    font-size:11px;
+
+    color:gray;
+
+    margin-left:6px;
+
+}
+
+.deleted-message{
+
+    color:gray;
+
+    font-style:italic;
+
+}

@@ -141,32 +141,59 @@ function renderMessages(messages) {
 
     messages.forEach(message => {
 
-        const div =
-            document.createElement("div");
+        const div = document.createElement("div");
 
-        if (
-            message.senderId ===
-            currentUserId
-        ) {
+        if (message.senderId === currentUserId) {
 
-            div.className =
-                "message sent";
+            div.className = "message sent";
 
         } else {
 
-            div.className =
-                "message received";
+            div.className = "message received";
         }
 
-        div.innerHTML =
-            `
-            <div>
-                ${message.text}
-            </div>
+        let html = "";
+
+        if (message.deleted) {
+
+            html = `
+                <div class="deleted-message">
+                    This message was deleted.
+                </div>
             `;
 
-        messagesContainer
-            .appendChild(div);
+        } else {
+
+            html = `
+                <div class="message-body">
+
+                    <div class="message-text">
+
+                        ${message.text}
+
+                        ${message.edited ? "<span class='edited'>(edited)</span>" : ""}
+
+                    </div>
+
+                    <button
+                        class="menu-btn"
+                        onclick="toggleMenu(event,'${message.id}', ${message.senderId === currentUserId})">
+                        ⋮
+                    </button>
+
+                    <div
+                        class="message-menu hidden"
+                        id="menu-${message.id}">
+                    </div>
+
+                </div>
+            `;
+        }
+
+        div.innerHTML = html;
+
+        messagesContainer.appendChild(div);
+
     });
 
     messagesContainer.scrollTop =
@@ -230,6 +257,182 @@ async function sendMessage() {
 
         alert("Cannot send message.");
     }
+}
+
+function toggleMenu(event,messageId,isMine){
+
+    event.stopPropagation();
+
+    document
+    .querySelectorAll(".message-menu")
+    .forEach(menu=>{
+
+        menu.classList.add("hidden");
+
+    });
+
+    const menu =
+    document.getElementById(
+        "menu-"+messageId
+    );
+
+    if(isMine){
+
+        menu.innerHTML =
+
+        `
+        <div onclick="editMessage('${messageId}')">
+            ✏️ Edit
+        </div>
+
+        <div onclick="deleteMessage('${messageId}')">
+            🗑 Delete
+        </div>
+
+        <div onclick="reportMessage('${messageId}')">
+            🚩 Report
+        </div>
+        `;
+
+    }else{
+
+        menu.innerHTML=
+
+        `
+        <div onclick="reportMessage('${messageId}')">
+            🚩 Report
+        </div>
+        `;
+    }
+
+    menu.classList.toggle("hidden");
+}
+
+window.onclick=function(){
+
+    document
+    .querySelectorAll(".message-menu")
+    .forEach(menu=>{
+
+        menu.classList.add("hidden");
+
+    });
+
+}
+
+async function editMessage(messageId){
+
+    const newText=
+    prompt("Edit message");
+
+    if(newText==null)
+        return;
+
+    const response =
+    await fetch(API+"/chats/edit",{
+
+        method:"PUT",
+
+        headers:{
+            "Content-Type":"application/json"
+        },
+
+        body:JSON.stringify({
+
+            chatId:chatId,
+
+            messageId:messageId,
+
+            editorId:currentUserId,
+
+            newText:newText
+        })
+
+    });
+
+    if(response.ok){
+
+        loadMessages();
+
+    }else{
+
+        alert(await response.json());
+
+    }
+
+}
+
+async function deleteMessage(messageId){
+
+    if(!confirm("Delete message?"))
+        return;
+
+    const response =
+    await fetch(API+"/chats/delete",{
+
+        method:"DELETE",
+
+        headers:{
+            "Content-Type":"application/json"
+        },
+
+        body:JSON.stringify({
+
+            chatId:chatId,
+
+            messageId:messageId,
+
+            requesterId:currentUserId
+
+        })
+
+    });
+
+    if(response.ok){
+
+        loadMessages();
+
+    }else{
+
+        alert(await response.json());
+
+    }
+
+}
+
+async function reportMessage(messageId){
+
+    const response=
+    await fetch(API+"/chats/report",{
+
+        method:"POST",
+
+        headers:{
+            "Content-Type":"application/json"
+        },
+
+        body:JSON.stringify({
+
+            chatId:chatId,
+
+            messageId:messageId,
+
+            reporterId:currentUserId
+
+        })
+
+    });
+
+    if(response.ok){
+
+        alert("Reported.");
+
+    }else{
+
+        alert(await response.json());
+
+    }
+
 }
 
 /* Buttons */
