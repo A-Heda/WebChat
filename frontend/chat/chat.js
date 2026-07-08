@@ -8,6 +8,9 @@ const params =
 const chatId =
     params.get("id");
 
+const chatType =
+    params.get("type");
+
 const currentUserId =
     localStorage.getItem("userId");
 
@@ -45,14 +48,21 @@ window.onload = async function () {
         return;
     }
 
+    if(chatType === "GROUP"){
+
+    await loadGroupInfo();
+
+    }else{
+
     await loadChatInfo();
+    }
 
     await loadMessages();
 
     setInterval(loadMessages, 3000);
 };
 
-/* Load Chat Header */
+/* Load PrivateChat Header */
 
 async function loadChatInfo() {
 
@@ -92,6 +102,58 @@ async function loadChatInfo() {
         console.error(error);
 
         alert("Cannot load chat info.");
+    }
+}
+
+/* Load GroupChat Header */
+async function loadGroupInfo() {
+
+    try {
+
+        const groupId =
+            chatId.replace("group_", "");
+
+        const response =
+            await fetch(
+                API +
+                "/groups/info?groupId=" +
+                groupId
+            );
+
+        const group =
+            await response.json();
+
+        if (response.ok) {
+
+            otherUserId =
+                group.otherUserId;
+
+            otherUsername =
+                group.otherUsername;
+
+            chatName.textContent =
+                group.otherUsername;
+
+            chatSubtitle.textContent =
+                "Group ID: " +
+                group.otherUserId;
+
+            document
+                .getElementById("chat-avatar")
+                .src =
+                group.imagePath ||
+                "../assets/group.png";
+
+        } else {
+
+            alert(group);
+        }
+
+    } catch (error) {
+
+        console.error(error);
+
+        alert("Cannot load group info.");
     }
 }
 
@@ -267,7 +329,16 @@ openInfo.onclick = function () {
     if (!otherUserId)
         return;
 
+    if(chatType==="PRIVATE"){
+
     window.location.href =
-        "../user-info/user-info.html?id=" +
-        otherUserId;
+    "../user-info/user-info.html?id="+
+    otherUserId;
+
+}else{
+
+    window.location.href =
+    "../group-info/group-info.html?id="+
+    otherUserId;
+}
 };

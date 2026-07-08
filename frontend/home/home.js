@@ -86,17 +86,25 @@ function renderChats(chats) {
         div.className =
             "chat-item";
 
-        div.innerHTML =
-            `
-            <div>
-                ${chat.otherUsername}
-            </div>
-            `;
+        div.innerHTML = `
+    <img class="chat-avatar"
+         src="${chat.imagePath || "../assets/default-avatar.png"}">
+
+    <div class="chat-info">
+        <div class="chat-name">
+            ${chat.otherUsername}
+        </div>
+
+        <div class="chat-type">
+            ${chat.type}
+        </div>
+    </div>
+`;
 
         div.onclick =
             function () {
 
-                openChat(chat.chatId);
+                openChat(chat);
             };
 
         chatList.appendChild(div);
@@ -104,11 +112,13 @@ function renderChats(chats) {
 }
 
 /*Open selected chat*/
-function openChat(chatId) {
+function openChat(chat){
 
     window.location.href =
         "../chat/chat.html?id=" +
-        chatId;
+        chat.chatId +
+        "&type=" +
+        chat.type;
 }
 
 /*Create private chat*/
