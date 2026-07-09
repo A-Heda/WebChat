@@ -134,44 +134,24 @@
 </div>
 
 
-<div class="modal-overlay"
-     id="create-group-modal">
 
+<div class="modal-overlay" id="create-group-modal">
     <div class="modal group-modal">
 
         <h3>Create Group</h3>
 
-        <input
-                id="group-name-input"
-                placeholder="Group Name">
+        <input id="group-id-input" placeholder="Group ID">
 
-        <div
-                id="group-members-list"
-                class="group-members-list">
+        <input id="group-name-input" placeholder="Group Name">
 
-        </div>
+        <div id="group-members-list" class="group-members-list"></div>
 
         <div class="modal-actions">
-
-            <button
-                    onclick="closeModal('create-group-modal')">
-
-                Cancel
-
-            </button>
-
-            <button
-                    class="primary"
-                    onclick="createGroup()">
-
-                Create
-
-            </button>
-
+            <button onclick="closeModal('create-group-modal')">Cancel</button>
+            <button class="primary" onclick="createGroup()">Create</button>
         </div>
 
     </div>
-
 </div>
 
     <div class="modal-overlay" id="settings-modal">

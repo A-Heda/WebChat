@@ -1,6 +1,7 @@
 const API = "http://localhost:8080";
 
 let contacts = [];
+let selectedMembers = [];
 
 /*Elements*/
 const chatList = document.getElementById("chat-list");
@@ -89,6 +90,43 @@ src="${contact.imagePath || "../assets/default-avatar.png"}">
 
     });
 
+}
+
+function renderGroupMembers() {
+    const list = document.getElementById("group-members-list");
+
+    list.innerHTML = "";
+    selectedMembers = [];
+
+    contacts.forEach(c => {
+        const item = document.createElement("label");
+        item.className = "group-member";
+
+        const image =
+        !c.imagePath || c.imagePath === "null"
+        ? "../assets/default-avatar.png"
+        : c.imagePath;
+
+    item.innerHTML = `
+        <input type="checkbox" value="${c.id}">
+
+        <img class="chat-avatar" src="${image}">
+
+        <div class="chat-info">
+            <div class="chat-name">${c.username}</div>
+            <div class="chat-id">@${c.id}</div>
+        </div>
+        `;
+
+        item.querySelector("input").addEventListener("change", (e) => {
+            selectedMembers = e.target.checked 
+                ? [...selectedMembers, c.id] 
+                : selectedMembers.filter(id => id !== c.id);
+
+        });
+
+        list.appendChild(item);
+    });
 }
 
 function searchContacts() {
@@ -382,4 +420,45 @@ async function openNewChat() {
     await loadContacts();
     renderContacts(contacts);
     openModal("contacts-modal");
+}
+
+
+async function openCreateGroup() {
+
+    closeModal("contacts-modal");
+
+    await loadContacts();
+
+    renderGroupMembers();
+
+    openModal("create-group-modal");
+
+}
+
+async function createGroup() {
+    const groupId = document.getElementById("group-id-input").value.trim();
+    const groupName = document.getElementById("group-name-input").value.trim();
+    if (!groupId || !groupName) return alert("Fill all fields.");
+    const payload = {
+        groupId,
+        groupName,
+        adminId: localStorage.getItem("userId"),
+        memberIds: selectedMembers
+    };
+
+    try {
+        const res = await fetch(`${API}/groups/create`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data || "Failed to create group");
+        closeModal("create-group-modal");
+
+        window.location.href = "../chat/chat.html?id=" + data + "&type=GROUP";
+    } catch (err) {
+        console.error("Group creation failed:", err);
+        alert(err.message);
+    }
 }
