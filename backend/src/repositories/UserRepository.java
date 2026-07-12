@@ -19,9 +19,9 @@ public class UserRepository {
 
     private User deserializeUser(String line) {
 
-        String[] parts = line.split("\\|" , -1);
+        String[] parts = line.split("\\|", -1);
 
-        if(parts.length != 4) {
+        if (parts.length != 4) {
             return null;
         }
 
@@ -29,13 +29,12 @@ public class UserRepository {
                 parts[0],
                 parts[1],
                 parts[2],
-                parts[3]
-        );
+                parts[3]);
     }
 
     public void saveUser(User user) {
 
-        try(BufferedWriter writer = new BufferedWriter(new FileWriter(USERS_FILE, true))) {
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(USERS_FILE, true))) {
 
             writer.write(serializeUser(user));
             writer.newLine();
@@ -45,19 +44,29 @@ public class UserRepository {
         }
     }
 
+    public void deleteUser(String userId) {
+
+        List<User> users = getAllUsers();
+
+        users.removeIf(
+                user -> user.getId().equals(userId));
+
+        overwriteUsers(users);
+    }
+
     public List<User> getAllUsers() {
 
         List<User> users = new ArrayList<>();
 
-        try(BufferedReader reader =  new BufferedReader(new FileReader(USERS_FILE))) {
+        try (BufferedReader reader = new BufferedReader(new FileReader(USERS_FILE))) {
 
             String line;
 
-            while((line = reader.readLine()) != null) {
+            while ((line = reader.readLine()) != null) {
 
                 User user = deserializeUser(line);
 
-                if(user != null) {
+                if (user != null) {
                     users.add(user);
                 }
             }
@@ -73,9 +82,9 @@ public class UserRepository {
 
         List<User> users = getAllUsers();
 
-        for(User user : users) {
+        for (User user : users) {
 
-            if(user.getUsername().equals(username)) {
+            if (user.getUsername().equals(username)) {
                 return user;
             }
         }
@@ -87,9 +96,9 @@ public class UserRepository {
 
         List<User> users = getAllUsers();
 
-        for(User user : users) {
+        for (User user : users) {
 
-            if(user.getId().equals(id)) {
+            if (user.getId().equals(id)) {
                 return user;
             }
         }
@@ -101,18 +110,18 @@ public class UserRepository {
 
         List<User> users = getAllUsers();
 
-        for(int i = 0; i < users.size(); i++) {
+        for (int i = 0; i < users.size(); i++) {
 
-            if(users.get(i).getId().equals(updatedUser.getId())) {
+            if (users.get(i).getId().equals(updatedUser.getId())) {
 
                 users.set(i, updatedUser);
                 break;
             }
         }
 
-        try(BufferedWriter writer = new BufferedWriter(new FileWriter(USERS_FILE))) {
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(USERS_FILE))) {
 
-            for(User user : users) {
+            for (User user : users) {
 
                 writer.write(serializeUser(user));
                 writer.newLine();
@@ -125,17 +134,16 @@ public class UserRepository {
 
     public void overwriteUsers(List<User> users) {
 
-    try(BufferedWriter writer =
-                new BufferedWriter(
-                        new FileWriter(USERS_FILE))) {
+        try (BufferedWriter writer = new BufferedWriter(
+                new FileWriter(USERS_FILE))) {
 
-        for(User user : users) {
-            writer.write(serializeUser(user));
-            writer.newLine();
+            for (User user : users) {
+                writer.write(serializeUser(user));
+                writer.newLine();
+            }
+
+        } catch (IOException e) {
+            e.printStackTrace();
         }
-
-    } catch(IOException e) {
-        e.printStackTrace();
     }
-}
 }
