@@ -229,9 +229,22 @@ function renderMessages(messages) {
             html = `
                 <div class="message-body">
 
-                    <div class="message-text">
+                    ${
+        chatType === "GROUP" ? `
+                <div class="sender-header">
+                    <img class="sender-avatar"
+                    src="${message.senderImagePath || "../assets/default-avatar.png"}">
+                    <span class="sender-name">
+                     ${message.senderUsername}
+                    </span>
 
-                        ${message.text}
+                </div>
+                        ` : ""
+}
+
+            <div class="message-text">
+
+            ${message.text}
 
                         ${message.edited ? "<span class='edited'>(edited)</span>" : ""}
 

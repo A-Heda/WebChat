@@ -9,6 +9,8 @@ import com.sun.net.httpserver.HttpHandler;
 import model.Message;
 import services.ChatPreview;
 import services.ChatService;
+import services.UserService;
+import model.User;
 
 import java.io.IOException;
 import java.io.BufferedReader;
@@ -19,10 +21,12 @@ import java.util.List;
 public class ChatController implements HttpHandler {
 
     private ChatService chatService;
+    private UserService userService;
     private Gson gson;
 
     public ChatController() {
         chatService = new ChatService();
+        userService = new UserService();
         gson = new Gson();
     }
 
@@ -256,24 +260,51 @@ public class ChatController implements HttpHandler {
     // GET /chats/messages?chatId=...
     private void getMessages(HttpExchange exchange) throws IOException {
 
-        String query = exchange.getRequestURI().getQuery();
+    String query = exchange.getRequestURI().getQuery();
 
-        if (query == null || !query.startsWith("chatId=")) {
+    if (query == null || !query.startsWith("chatId=")) {
 
-            sendResponse(exchange, "Missing chatId parameter.", 400);
+        sendResponse(exchange, "Missing chatId parameter.", 400);
 
-            return;
+        return;
+    }
+
+    String chatId = query.substring("chatId=".length());
+
+    List<Message> messages = chatService.getAllMessages(chatId);
+
+    if (messages == null) {
+
+        sendResponse(exchange, "Chat not found.", 404);
+
+        return;
+    }
+
+    JsonArray result = new JsonArray();
+
+    for (Message message : messages) {
+
+        JsonObject json = gson.toJsonTree(message).getAsJsonObject();
+
+        User sender = userService.findUserById(message.getSenderId());
+
+        if (sender != null) {
+
+            json.addProperty("senderUsername", sender.getUsername());
+            json.addProperty("senderImagePath", sender.getProfileImagePath());
+
+        } else {
+
+            json.addProperty("senderUsername", "Unknown");
+            json.addProperty("senderImagePath", "../assets/default-avatar.png");
+
         }
 
-        String chatId = query.substring("chatId=".length());
-
-        List<Message> messages = chatService.getAllMessages(chatId);
-
-        if (messages == null)
-            sendResponse(exchange, "Chat not found.", 404);
-
-        sendResponse(exchange, messages, 200);
+        result.add(json);
     }
+
+    sendResponse(exchange, result, 200);
+}
 
     private void getUserChats(HttpExchange exchange) throws IOException {
 
