@@ -1,7 +1,11 @@
 const API = "http://localhost:8080";
 
+const isArchivePage =
+    window.location.pathname.includes("archive");
+
 let contacts = [];
 let selectedMembers = [];
+let chatMap = {};
 
 /*Elements*/
 const chatList = document.getElementById("chat-list");
@@ -334,8 +338,29 @@ async function loadChats() {
 
 /*Render chats in sidebar*/
 function renderChats(chats) {
+    chatMap = {};
 
     chatList.innerHTML = "";
+
+    if (isArchivePage) {
+
+    chats = chats.filter(chat => chat.archived);
+
+    } else {
+
+    chats = chats.filter(chat => !chat.archived);
+
+    }
+
+chats.sort((a, b) => {
+
+    if (a.pinned !== b.pinned)
+
+        return b.pinned - a.pinned;
+
+    return 0;
+
+});
 
     if (chats.length === 0) {
 
@@ -345,7 +370,26 @@ function renderChats(chats) {
         return;
     }
 
+    // chats = chats
+    // .filter(chat =>
+
+    //     isArchivePage
+    //         ? chat.archived
+    //         : !chat.archived
+
+    // )
+    // .sort((a, b) => {
+
+    //     if (a.pinned !== b.pinned) {
+    //         return b.pinned - a.pinned;
+    //     }
+
+    //     return 0;
+    // });
+
     chats.forEach(chat => {
+
+        chatMap[chat.chatId] = chat;
 
         const div =
             document.createElement("div");
@@ -354,18 +398,55 @@ function renderChats(chats) {
             "chat-item";
 
         div.innerHTML = `
-    <img class="chat-avatar"
-         src="${chat.imagePath || "../assets/default-avatar.png"}">
 
-    <div class="chat-info">
-        <div class="chat-name">
-            ${chat.otherUsername}
-        </div>
+<img class="chat-avatar"
+     src="${chat.imagePath || "../assets/default-avatar.png"}">
 
-        <div class="chat-type">
-            ${chat.type}
-        </div>
+<div class="chat-info">
+
+    <div class="chat-name">
+
+        ${chat.otherUsername}
+
+        ${chat.pinned ? "📌" : ""}
+
     </div>
+
+    <div class="chat-type">
+
+        ${chat.type}
+
+    </div>
+
+</div>
+
+<div class="chat-menu">
+
+    <button class="menu-btn"
+        onclick="event.stopPropagation();toggleMenu(this)">
+
+        <i class="fa-solid fa-ellipsis-vertical"></i>
+
+    </button>
+
+    <div class="menu-dropdown">
+
+        <div onclick="event.stopPropagation();togglePin(chatMap['${chat.chatId}'])">
+
+            ${chat.pinned ? "📌 Unpin" : "📌 Pin"}
+
+        </div>
+
+        <div onclick="event.stopPropagation();toggleArchive(chatMap['${chat.chatId}'])">
+
+            ${chat.archived ? "📦 Unarchive" : "📦 Archive"}
+
+        </div>
+
+    </div>
+
+</div>
+
 `;
 
         div.onclick =
@@ -426,7 +507,9 @@ function openModal(id) {
 
 function openArchive() {
 
-    alert("Coming Soon");
+    window.location.href =
+        "../archive/archive.html";
+
 }
 
 async function openNewChat() {
@@ -723,5 +806,91 @@ function toggleDarkMode() {
             alert(result);
 
         }
+    }
+
+        async function togglePin(chat) {
+
+    const response = await fetch(API + "/chats/pin", {
+
+        method: "PUT",
+
+        headers: {
+            "Content-Type": "application/json"
+        },
+
+        body: JSON.stringify({
+
+            userId: localStorage.getItem("userId"),
+
+            chatId: chat.chatId,
+
+            pinned: !chat.pinned
+
+        })
+
+    });
+
+    if(response.ok){
+
+        chat.pinned = !chat.pinned;
+
+        loadChats();
+
+    }else{
+
+        alert(await response.json());
 
     }
+}
+
+async function toggleArchive(chat){
+
+    const response = await fetch(API + "/chats/archive",{
+
+        method:"PUT",
+
+        headers:{
+            "Content-Type":"application/json"
+        },
+
+        body:JSON.stringify({
+
+            userId:localStorage.getItem("userId"),
+
+            chatId:chat.chatId,
+
+            archived:!chat.archived
+
+        })
+
+    });
+
+    if(response.ok){
+
+        chat.archived = !chat.archived;
+
+        loadChats();
+
+    }else{
+
+        alert(await response.json());
+
+    }
+
+}
+
+function toggleMenu(button) {
+
+    const menu = button.nextElementSibling;
+
+    document.querySelectorAll(".menu-dropdown").forEach(m => {
+
+        if (m !== menu)
+            m.classList.remove("show");
+
+    });
+
+    menu.classList.toggle("show");
+}
+
+    

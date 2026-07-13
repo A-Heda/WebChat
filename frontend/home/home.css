@@ -834,3 +834,97 @@ body.dark .group-member{
     font-size: 13px;
     color: #777;
 }
+
+.chat-menu{
+
+    position:relative;
+
+    margin-left:auto;
+
+}
+
+.menu-btn{
+
+    border:none;
+
+    background:none;
+
+    cursor:pointer;
+
+    padding:6px;
+
+    font-size:16px;
+
+    color:#666;
+
+}
+
+.menu-btn:hover{
+
+    color:#2196f3;
+
+}
+
+.menu-dropdown{
+
+    display:none;
+
+    position:absolute;
+
+    right:0;
+
+    top:28px;
+
+    background:white;
+
+    border-radius:10px;
+
+    min-width:130px;
+
+    box-shadow:0 4px 15px rgba(0,0,0,.2);
+
+    z-index:100;
+
+    overflow:hidden;
+
+}
+
+.menu-dropdown.show{
+
+    display:block;
+
+}
+
+.menu-dropdown div{
+
+    padding:10px;
+
+    cursor:pointer;
+
+    transition:.2s;
+
+}
+
+.menu-dropdown div:hover{
+
+    background:#f2f2f2;
+
+}
+
+body.dark .menu-dropdown{
+
+    background:#2f3136;
+
+}
+
+body.dark .menu-dropdown div{
+
+    color:white;
+
+}
+
+body.dark .menu-dropdown div:hover{
+
+    background:#40444b;
+
+}
