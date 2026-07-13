@@ -10,6 +10,7 @@ import model.Message;
 import services.ChatPreview;
 import services.ChatService;
 import services.UserService;
+import services.ChatStatusService;
 import model.User;
 
 import java.io.IOException;
@@ -22,11 +23,13 @@ public class ChatController implements HttpHandler {
 
     private ChatService chatService;
     private UserService userService;
+    private ChatStatusService chatStatusService;
     private Gson gson;
 
     public ChatController() {
         chatService = new ChatService();
         userService = new UserService();
+        chatStatusService = new ChatStatusService();
         gson = new Gson();
     }
 
@@ -123,6 +126,26 @@ public class ChatController implements HttpHandler {
                     getChatInfo(exchange);
                 } else {
                     sendResponse(exchange, "Method not allowed", 405);
+                }
+
+                break;
+
+            case "/chats/pin":
+
+                if(method.equals("PUT")){
+                    pinChat(exchange);
+                } else {
+                    sendResponse(exchange,"Method not allowed",405);
+                }
+
+                break;
+
+            case "/chats/archive":
+
+                if(method.equals("PUT")){
+                    archiveChat(exchange);
+                } else {
+                    sendResponse(exchange,"Method not allowed",405);
                 }
 
                 break;
@@ -384,6 +407,50 @@ public class ChatController implements HttpHandler {
     // }
 
     // }
+
+    private void archiveChat(HttpExchange exchange) throws IOException{
+        BufferedReader reader = 
+            new BufferedReader(new InputStreamReader(exchange.getRequestBody()));
+
+        JsonObject json =
+            gson.fromJson(reader,JsonObject.class);
+
+        String userId =
+            json.get("userId").getAsString();
+
+        String chatId =
+            json.get("chatId").getAsString();
+
+        boolean archived =
+            json.get("archived").getAsBoolean();
+
+        chatStatusService.archiveChat(userId, chatId, archived);
+
+    sendResponse(exchange,"SUCCESS",200);
+}
+
+private void pinChat(HttpExchange exchange) throws IOException {
+
+    BufferedReader reader =
+            new BufferedReader(new InputStreamReader(exchange.getRequestBody()));
+
+    JsonObject json =
+            gson.fromJson(reader,JsonObject.class);
+
+    String userId =
+            json.get("userId").getAsString();
+
+    String chatId =
+            json.get("chatId").getAsString();
+
+    boolean pinned =
+            json.get("pinned").getAsBoolean();
+
+    chatStatusService.pinChat(userId, chatId, pinned);
+
+    sendResponse(exchange,"SUCCESS",200);
+
+}
 
     private void sendResponse(HttpExchange exchange,
             Object data,

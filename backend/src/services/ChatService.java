@@ -6,6 +6,7 @@ import model.Group;
 import repositories.ChatRepository;
 import repositories.GroupRepository;
 import repositories.UserRepository;
+import repositories.ChatStatusRepository;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,12 +18,14 @@ public class ChatService {
     private ChatRepository chatRepository;
     private UserRepository userRepository;
     private GroupRepository groupRepository;
+    private ChatStatusRepository chatStatusRepository;
 
 
     public ChatService() {
         chatRepository = new ChatRepository();
         userRepository = new UserRepository();
         groupRepository = new GroupRepository();
+        chatStatusRepository = new ChatStatusRepository();
     }
 
 
@@ -280,7 +283,9 @@ public class ChatService {
                 continue;
 
             result.add(new ChatPreview(chatId, otherUserId, otherUser.getUsername(),
-                        otherUser.getProfileImagePath(), "PRIVATE"));
+                        otherUser.getProfileImagePath(), "PRIVATE",
+                        chatStatusRepository.isPinned(userId,chatId),
+                        chatStatusRepository.isArchived(userId,chatId)));
         }
 
     return result;
@@ -293,7 +298,9 @@ public class ChatService {
 
         for(Group group : groups) {
             result.add(new ChatPreview("group_" + group.getId(),group.getId() , group.getName(),
-            group.getGroupImagePath(), "GROUP"));
+            group.getGroupImagePath(), "GROUP" , chatStatusRepository.isPinned(userId,"group_"+group.getId()),
+            chatStatusRepository.isArchived(userId,"group_"+group.getId()))
+            );
         }
 
     return result;
