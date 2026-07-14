@@ -6,20 +6,29 @@ import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 
 import model.User;
+import services.ContactService;
+import services.GroupService;
 import services.UserService;
+import services.ChatStatusService;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 
 public class UserController implements HttpHandler {
-
+    private ContactService contactService;
     private UserService userService;
     private Gson gson;
+
+    private ChatStatusService chatStatusService;
+    private GroupService groupService;
 
     public UserController() {
         userService = new UserService();
         gson = new Gson();
+        contactService = new ContactService();
+        chatStatusService = new ChatStatusService();
+        groupService = new GroupService();
     }
 
     @Override
@@ -87,6 +96,8 @@ public class UserController implements HttpHandler {
 
                 break;
 
+            
+
             case "/users/password":
 
                 if (method.equals("PUT")) {
@@ -121,6 +132,66 @@ public class UserController implements HttpHandler {
 
                 if (method.equals("PUT")) {
                     changeUsername(exchange);
+                } else {
+                    sendResponse(exchange, "Method not allowed", 405);
+                }
+
+                break;
+
+            case "/users/contact":
+
+                if (method.equals("POST")) {
+                    addContact(exchange);
+                } else {
+                    sendResponse(exchange, "Method not allowed", 405);
+                }
+
+                break;
+
+            case "/users/block":
+
+                if (method.equals("PUT")) {
+                    blockUser(exchange);
+                } else {
+                    sendResponse(exchange, "Method not allowed", 405);
+                }
+
+                break;
+
+            case "/users/unblock":
+
+                if (method.equals("PUT")) {
+                    unblockUser(exchange);
+                } else {
+                    sendResponse(exchange, "Method not allowed", 405);
+                }
+
+                break;
+
+            case "/users/archive":
+
+                if (method.equals("PUT")) {
+                    archiveChat(exchange);
+                } else {
+                    sendResponse(exchange, "Method not allowed", 405);
+                }
+
+                break;
+
+            case "/users/mutual-groups":
+
+                if (method.equals("GET")) {
+                    getMutualGroups(exchange);
+                } else {
+                    sendResponse(exchange, "Method not allowed", 405);
+                }
+
+                break;
+
+            case "/users/status":
+
+                if (method.equals("GET")) {
+                    getUserStatus(exchange);
                 } else {
                     sendResponse(exchange, "Method not allowed", 405);
                 }
@@ -242,6 +313,224 @@ public class UserController implements HttpHandler {
         }
     }
 
+    private void addContact(HttpExchange exchange)
+            throws IOException {
+
+        BufferedReader reader = new BufferedReader(
+                new InputStreamReader(
+                        exchange.getRequestBody()));
+
+        JsonObject json = gson.fromJson(reader, JsonObject.class);
+
+        String ownerId = json.get("ownerId").getAsString();
+
+        String contactId = json.get("contactId").getAsString();
+
+        String result = contactService.addContact(ownerId, contactId);
+
+        if (result.equals("SUCCESS"))
+            sendResponse(exchange, result, 200);
+        else
+            sendResponse(exchange, result, 400);
+    }
+
+    private void blockUser(HttpExchange exchange) throws IOException {
+
+        BufferedReader reader = new BufferedReader(
+                new InputStreamReader(exchange.getRequestBody()));
+
+        JsonObject json = gson.fromJson(reader, JsonObject.class);
+
+        String ownerId = json.get("ownerId").getAsString();
+
+        String contactId = json.get("contactId").getAsString();
+
+        String result = contactService.blockContact(ownerId, contactId);
+
+        if (result.equals("SUCCESS"))
+            sendResponse(exchange, result, 200);
+        else
+            sendResponse(exchange, result, 400);
+    }
+
+    private void unblockUser(HttpExchange exchange) throws IOException {
+
+        BufferedReader reader = new BufferedReader(
+                new InputStreamReader(exchange.getRequestBody()));
+
+        JsonObject json = gson.fromJson(reader, JsonObject.class);
+
+        String ownerId = json.get("ownerId").getAsString();
+
+        String contactId = json.get("contactId").getAsString();
+
+        String result = contactService.unblockContact(ownerId, contactId);
+
+        if (result.equals("SUCCESS"))
+            sendResponse(exchange, result, 200);
+        else
+            sendResponse(exchange, result, 400);
+    }
+
+    private void archiveChat(HttpExchange exchange) throws IOException {
+
+        BufferedReader reader = new BufferedReader(
+                new InputStreamReader(exchange.getRequestBody()));
+
+        JsonObject json = gson.fromJson(reader, JsonObject.class);
+
+        String userId = json.get("userId").getAsString();
+
+        String chatId = json.get("chatId").getAsString();
+
+        boolean archived = json.get("archived").getAsBoolean();
+
+        chatStatusService.setArchived(userId, chatId, archived);
+
+        sendResponse(exchange, "SUCCESS", 200);
+    }
+
+    private void getMutualGroups(HttpExchange exchange) throws IOException {
+
+        String query = exchange.getRequestURI().getQuery();
+
+        String[] params = query.split("&");
+
+        String user1 = "";
+        String user2 = "";
+
+        for (String p : params) {
+
+            if (p.startsWith("user1="))
+                user1 = p.substring(6);
+
+            if (p.startsWith("user2="))
+                user2 = p.substring(6);
+        }
+
+        sendResponse(
+                exchange,
+                groupService.getMutualGroups(user1, user2),
+                200);
+    }
+
+    private void getUserStatus(HttpExchange exchange) throws IOException {
+
+        String query = exchange.getRequestURI().getQuery();
+
+        String[] params = query.split("&");
+
+        String ownerId = "";
+        String contactId = "";
+        String chatId = "";
+
+        for (String p : params) {
+
+            if (p.startsWith("ownerId="))
+                ownerId = p.substring(8);
+
+            else if (p.startsWith("contactId="))
+                contactId = p.substring(10);
+
+            else if (p.startsWith("chatId="))
+                chatId = p.substring(7);
+        }
+
+        JsonObject response = new JsonObject();
+
+        response.addProperty(
+                "blocked",
+                contactService.isBlocked(ownerId, contactId));
+
+        response.addProperty(
+                "contact",
+                contactService.isContact(ownerId, contactId));
+
+        response.addProperty(
+                "archived",
+                chatStatusService.isArchived(ownerId, chatId));
+
+        sendResponse(exchange, response, 200);
+    }
+
+    private void removeContact(HttpExchange exchange)
+            throws IOException {
+
+        BufferedReader reader = new BufferedReader(
+                new InputStreamReader(
+                        exchange.getRequestBody()));
+
+        JsonObject json = gson.fromJson(reader, JsonObject.class);
+
+        String ownerId = json.get("ownerId").getAsString();
+
+        String contactId = json.get("contactId").getAsString();
+
+        String result = contactService.removeContact(ownerId, contactId);
+
+        if (result.equals("SUCCESS"))
+            sendResponse(exchange, result, 200);
+        else
+            sendResponse(exchange, result, 400);
+    }
+
+    private void setBlocked(HttpExchange exchange)
+            throws IOException {
+
+        BufferedReader reader = new BufferedReader(
+                new InputStreamReader(
+                        exchange.getRequestBody()));
+
+        JsonObject json = gson.fromJson(reader, JsonObject.class);
+
+        String ownerId = json.get("ownerId").getAsString();
+
+        String contactId = json.get("contactId").getAsString();
+
+        boolean blocked = json.get("blocked").getAsBoolean();
+
+        String result;
+
+        if (blocked)
+            result = contactService.blockContact(ownerId, contactId);
+        else
+            result = contactService.unblockContact(ownerId, contactId);
+
+        if (result.equals("SUCCESS"))
+            sendResponse(exchange, result, 200);
+        else
+            sendResponse(exchange, result, 400);
+    }
+
+    private void getContactStatus(HttpExchange exchange)
+            throws IOException {
+
+        String query = exchange.getRequestURI().getQuery();
+
+        if (query == null) {
+            sendResponse(exchange, "Missing parameters", 400);
+            return;
+        }
+
+        String[] params = query.split("&");
+
+        String ownerId = params[0].split("=")[1];
+
+        String contactId = params[1].split("=")[1];
+
+        JsonObject response = new JsonObject();
+
+        response.addProperty(
+                "isContact",
+                contactService.isContact(ownerId, contactId));
+
+        response.addProperty(
+                "blocked",
+                contactService.isBlocked(ownerId, contactId));
+
+        sendResponse(exchange, response, 200);
+    }
+
     // PUT /users/password
     private void changePassword(HttpExchange exchange) throws IOException {
 
@@ -341,35 +630,30 @@ public class UserController implements HttpHandler {
     }
 
     private void deleteAccount(HttpExchange exchange)
-        throws IOException {
+            throws IOException {
 
-    BufferedReader reader =
-            new BufferedReader(
-                    new InputStreamReader(
-                            exchange.getRequestBody()));
+        BufferedReader reader = new BufferedReader(
+                new InputStreamReader(
+                        exchange.getRequestBody()));
 
-    JsonObject json =
-            gson.fromJson(reader, JsonObject.class);
+        JsonObject json = gson.fromJson(reader, JsonObject.class);
 
-    String userId =
-            json.get("userId").getAsString();
+        String userId = json.get("userId").getAsString();
 
-    String password =
-            json.get("password").getAsString();
+        String password = json.get("password").getAsString();
 
-    String result =
-            userService.deleteAccount(
-                    userId,
-                    password);
+        String result = userService.deleteAccount(
+                userId,
+                password);
 
-    if(result.equals("SUCCESS")){
+        if (result.equals("SUCCESS")) {
 
-        sendResponse(exchange,result,200);
+            sendResponse(exchange, result, 200);
 
-    }else{
+        } else {
 
-        sendResponse(exchange,result,400);
+            sendResponse(exchange, result, 400);
 
+        }
     }
-}
 }

@@ -424,7 +424,7 @@ public class ChatController implements HttpHandler {
         boolean archived =
             json.get("archived").getAsBoolean();
 
-        chatStatusService.archiveChat(userId, chatId, archived);
+        chatStatusService.setArchived(userId, chatId, archived);
 
     sendResponse(exchange,"SUCCESS",200);
 }

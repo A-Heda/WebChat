@@ -9,6 +9,7 @@ import services.GroupService;
 import model.Group;
 import services.ChatPreview;
 import services.ChatService;
+import services.ChatStatusService;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -21,26 +22,28 @@ public class GroupController implements HttpHandler {
     private GroupService groupService;
     private Gson gson;
     private ChatService chatService;
+    private ChatStatusService chatStatusService;
 
     public GroupController() {
         chatService = new ChatService();
         groupService = new GroupService();
+        chatStatusService = new ChatStatusService();
         gson = new Gson();
     }
 
     @Override
     public void handle(HttpExchange exchange) throws IOException {
 
-    exchange.getResponseHeaders().add("Access-Control-Allow-Origin","*");      //اتصال فرانت به بک با فعال کردن CORS
-    exchange.getResponseHeaders().add("Access-Control-Allow-Headers","Content-Type");
-    exchange.getResponseHeaders().add("Access-Control-Allow-Methods","GET, POST, PUT, DELETE, OPTIONS");
+        exchange.getResponseHeaders().add("Access-Control-Allow-Origin", "*"); // اتصال فرانت به بک با فعال کردن CORS
+        exchange.getResponseHeaders().add("Access-Control-Allow-Headers", "Content-Type");
+        exchange.getResponseHeaders().add("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
 
-    if(exchange.getRequestMethod().equalsIgnoreCase("OPTIONS")) {
-        exchange.sendResponseHeaders(204, -1);
-        return;
-    }
+        if (exchange.getRequestMethod().equalsIgnoreCase("OPTIONS")) {
+            exchange.sendResponseHeaders(204, -1);
+            return;
+        }
 
-        String method = exchange.getRequestMethod();          //POST , GET , PUT
+        String method = exchange.getRequestMethod(); // POST , GET , PUT
         String path = exchange.getRequestURI().getPath();
 
         switch (path) {
@@ -56,14 +59,28 @@ public class GroupController implements HttpHandler {
 
             case "/groups/info":
 
-                if(method.equals("GET")) {
+                if (method.equals("GET")) {
                     getGroupChatInfo(exchange);
-                }
-                else {
+                } else {
                     sendResponse(exchange, "Method not allowed", 405);
                 }
                 break;
 
+            case "/groups/status":
+
+                if (method.equals("GET")) {
+
+                    getGroupStatus(exchange);
+
+                } else {
+
+                    sendResponse(exchange,
+                            "Method not allowed",
+                            405);
+
+                }
+
+                break;
 
             case "/groups/add-member":
 
@@ -74,7 +91,6 @@ public class GroupController implements HttpHandler {
                 }
                 break;
 
-
             case "/groups/remove-member":
 
                 if (method.equals("POST")) {
@@ -83,27 +99,24 @@ public class GroupController implements HttpHandler {
                     sendResponse(exchange, "Method not allowed", 405);
                 }
                 break;
-                
 
             case "/groups/change-name":
 
-                if(method.equals("PUT")) {
+                if (method.equals("PUT")) {
                     changeGroupName(exchange);
                 } else {
                     sendResponse(exchange, "Method not allowed", 405);
                 }
                 break;
 
-
             case "/groups/change-image":
 
-                if(method.equals("PUT")) {
+                if (method.equals("PUT")) {
                     changeGroupImage(exchange);
                 } else {
-                sendResponse(exchange, "Method not allowed", 405);
+                    sendResponse(exchange, "Method not allowed", 405);
                 }
                 break;
-
 
             case "/groups/delete":
 
@@ -116,13 +129,12 @@ public class GroupController implements HttpHandler {
 
             case "/groups/leave":
 
-                if(method.equals("POST")) {
+                if (method.equals("POST")) {
                     leaveGroup(exchange);
                 } else {
                     sendResponse(exchange, "Method not allowed", 405);
-             }
-            break;
-
+                }
+                break;
 
             case "/groups/id":
 
@@ -147,164 +159,163 @@ public class GroupController implements HttpHandler {
         String groupId = json.get("groupId").getAsString();
 
         String groupName = json.get("groupName").getAsString();
-               
+
         String adminId = json.get("adminId").getAsString();
 
         List<String> memberIds = new ArrayList<>();
 
         JsonArray members = json.getAsJsonArray("memberIds");
 
-        for(int i = 0 ; i < members.size() ; i++) {
+        for (int i = 0; i < members.size(); i++) {
             memberIds.add(members.get(i).getAsString());
         }
 
         String result = chatService.createGroupChat(groupId, groupName, adminId, memberIds);
 
-        if(result.startsWith("group_")) {
-            sendResponse(exchange,result,200);
+        if (result.startsWith("group_")) {
+            sendResponse(exchange, result, 200);
         } else {
-            sendResponse(exchange,result,400);
+            sendResponse(exchange, result, 400);
         }
-        
+
     }
 
     private void addMember(HttpExchange exchange) throws IOException {
 
-    BufferedReader reader = new BufferedReader(new InputStreamReader(exchange.getRequestBody()));
+        BufferedReader reader = new BufferedReader(new InputStreamReader(exchange.getRequestBody()));
 
-    JsonObject json = gson.fromJson(reader, JsonObject.class);
+        JsonObject json = gson.fromJson(reader, JsonObject.class);
 
-    String groupId = json.get("groupId").getAsString();
+        String groupId = json.get("groupId").getAsString();
 
-    String userId = json.get("userId").getAsString();
+        String userId = json.get("userId").getAsString();
 
-    String result = groupService.addMember(groupId,userId);
+        String result = groupService.addMember(groupId, userId);
 
-    if("SUCCESS".equals(result))
-        sendResponse(exchange,result,200);
-    else
-        sendResponse(exchange,result,400);
+        if ("SUCCESS".equals(result))
+            sendResponse(exchange, result, 200);
+        else
+            sendResponse(exchange, result, 400);
 
-}
+    }
 
     private void removeMember(HttpExchange exchange) throws IOException {
 
-    BufferedReader reader = new BufferedReader(new InputStreamReader(exchange.getRequestBody()));
+        BufferedReader reader = new BufferedReader(new InputStreamReader(exchange.getRequestBody()));
 
-    JsonObject json = gson.fromJson(reader, JsonObject.class);
+        JsonObject json = gson.fromJson(reader, JsonObject.class);
 
-    String groupId = json.get("groupId").getAsString();
+        String groupId = json.get("groupId").getAsString();
 
-    String userId = json.get("userId").getAsString();
+        String userId = json.get("userId").getAsString();
 
-    String result = groupService.removeMember(groupId,userId);
+        String result = groupService.removeMember(groupId, userId);
 
-    if("SUCCESS".equals(result))
-        sendResponse(exchange,result,200);
-    else
-        sendResponse(exchange,result,400);
+        if ("SUCCESS".equals(result))
+            sendResponse(exchange, result, 200);
+        else
+            sendResponse(exchange, result, 400);
 
-}
+    }
 
     private void changeGroupName(HttpExchange exchange) throws IOException {
 
-    BufferedReader reader = new BufferedReader(new InputStreamReader(exchange.getRequestBody()));
+        BufferedReader reader = new BufferedReader(new InputStreamReader(exchange.getRequestBody()));
 
-    JsonObject json = gson.fromJson(reader, JsonObject.class);
+        JsonObject json = gson.fromJson(reader, JsonObject.class);
 
-    String groupId = json.get("groupId").getAsString();
+        String groupId = json.get("groupId").getAsString();
 
-    String newName = json.get("newGroupName").getAsString();
+        String newName = json.get("newGroupName").getAsString();
 
-    String result = groupService.changeGroupName(groupId,newName);
+        String result = groupService.changeGroupName(groupId, newName);
 
-    if("SUCCESS".equals(result))
-        sendResponse(exchange,result,200);
-    else
-        sendResponse(exchange,result,400);
+        if ("SUCCESS".equals(result))
+            sendResponse(exchange, result, 200);
+        else
+            sendResponse(exchange, result, 400);
 
-}
+    }
 
     private void changeGroupImage(HttpExchange exchange) throws IOException {
 
-    BufferedReader reader = new BufferedReader(new InputStreamReader(exchange.getRequestBody()));
+        BufferedReader reader = new BufferedReader(new InputStreamReader(exchange.getRequestBody()));
 
-    JsonObject json = gson.fromJson(reader, JsonObject.class);
+        JsonObject json = gson.fromJson(reader, JsonObject.class);
 
-    String groupId =  json.get("groupId").getAsString();
+        String groupId = json.get("groupId").getAsString();
 
-    String imagePath = json.get("imagePath").getAsString();
+        String imagePath = json.get("imagePath").getAsString();
 
-    String result = groupService.changeGroupImage(groupId,imagePath);
+        String result = groupService.changeGroupImage(groupId, imagePath);
 
-    if("SUCCESS".equals(result))
-        sendResponse(exchange,result,200);
-    else
-        sendResponse(exchange,result,400);
+        if ("SUCCESS".equals(result))
+            sendResponse(exchange, result, 200);
+        else
+            sendResponse(exchange, result, 400);
 
-}
-
+    }
 
     private void deleteGroup(HttpExchange exchange) throws IOException {
 
-    BufferedReader reader = new BufferedReader(new InputStreamReader(exchange.getRequestBody()));
+        BufferedReader reader = new BufferedReader(new InputStreamReader(exchange.getRequestBody()));
 
-    JsonObject json = gson.fromJson(reader, JsonObject.class);
+        JsonObject json = gson.fromJson(reader, JsonObject.class);
 
-    String groupId = json.get("groupId").getAsString();
-    String requesterId = json.get("requesterId").getAsString();
+        String groupId = json.get("groupId").getAsString();
+        String requesterId = json.get("requesterId").getAsString();
 
-    String result = groupService.deleteGroup(groupId, requesterId);
+        String result = groupService.deleteGroup(groupId, requesterId);
 
-    if("SUCCESS".equals(result))
-        sendResponse(exchange, result, 200);
-    else
-        sendResponse(exchange, result, 400);
-}
+        if ("SUCCESS".equals(result))
+            sendResponse(exchange, result, 200);
+        else
+            sendResponse(exchange, result, 400);
+    }
 
     private void leaveGroup(HttpExchange exchange) throws IOException {
 
-    BufferedReader reader = new BufferedReader(new InputStreamReader(exchange.getRequestBody()));
+        BufferedReader reader = new BufferedReader(new InputStreamReader(exchange.getRequestBody()));
 
-    JsonObject json = gson.fromJson(reader, JsonObject.class);
+        JsonObject json = gson.fromJson(reader, JsonObject.class);
 
-    String groupId = json.get("groupId").getAsString();
-    String userId = json.get("userId").getAsString();
+        String groupId = json.get("groupId").getAsString();
+        String userId = json.get("userId").getAsString();
 
-    String result = groupService.leaveGroup(groupId, userId);
+        String result = groupService.leaveGroup(groupId, userId);
 
-    if("SUCCESS".equals(result)) {
-        sendResponse(exchange, result, 200);
-    } else {
-        sendResponse(exchange, result, 400);
+        if ("SUCCESS".equals(result)) {
+            sendResponse(exchange, result, 200);
+        } else {
+            sendResponse(exchange, result, 400);
+        }
     }
-}
 
     private void findGroupById(HttpExchange exchange) throws IOException {
 
-    String query = exchange.getRequestURI().getQuery();
+        String query = exchange.getRequestURI().getQuery();
 
-    if(query == null || !query.startsWith("groupId=")) {
+        if (query == null || !query.startsWith("groupId=")) {
 
-        sendResponse(exchange, "Missing groupId parameter.",400);
+            sendResponse(exchange, "Missing groupId parameter.", 400);
 
-        return;
+            return;
+        }
+
+        String groupId = query.substring("groupId=".length());
+
+        Group group = groupService.findGroupById(groupId);
+
+        if (group == null)
+            sendResponse(exchange, "Group not found.", 404);
+        else
+            sendResponse(exchange, group, 200);
+
     }
 
-    String groupId = query.substring("groupId=".length());
-
-    Group group = groupService.findGroupById(groupId);
-
-    if(group == null)
-        sendResponse(exchange,"Group not found.",404);
-    else
-        sendResponse(exchange, group,200);
-
-}
-
     private void sendResponse(HttpExchange exchange,
-                              Object data,
-                              int statusCode) throws IOException {
+            Object data,
+            int statusCode) throws IOException {
 
         String jsonResponse = gson.toJson(data);
 
@@ -319,10 +330,10 @@ public class GroupController implements HttpHandler {
         exchange.getResponseBody().close();
     }
 
-    private void getGroupChatInfo (HttpExchange exchange) throws IOException {
+    private void getGroupChatInfo(HttpExchange exchange) throws IOException {
         String query = exchange.getRequestURI().getQuery();
 
-        if(query == null || !query.startsWith("groupId=")) {
+        if (query == null || !query.startsWith("groupId=")) {
             sendResponse(exchange, "Missing groupId parameter.", 400);
             return;
         }
@@ -338,5 +349,39 @@ public class GroupController implements HttpHandler {
         } else {
             sendResponse(exchange, result, 200);
         }
+    }
+
+    private void getGroupStatus(HttpExchange exchange)
+            throws IOException {
+
+        String query = exchange.getRequestURI().getQuery();
+
+        String[] params = query.split("&");
+
+        String userId = "";
+        String groupId = "";
+
+        for (String p : params) {
+
+            if (p.startsWith("userId="))
+                userId = p.substring(7);
+
+            else if (p.startsWith("groupId="))
+                groupId = p.substring(8);
+        }
+
+        JsonObject response = new JsonObject();
+
+        response.addProperty(
+                "admin",
+                groupService.isAdmin(groupId, userId));
+
+        response.addProperty(
+                "archived",
+                chatStatusService.isArchived(
+                        userId,
+                        "group_" + groupId));
+
+        sendResponse(exchange, response, 200);
     }
 }

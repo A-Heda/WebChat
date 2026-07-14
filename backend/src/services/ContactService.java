@@ -83,4 +83,19 @@ public class ContactService {
     public List<Contact> getContacts(String ownerId) {
         return contactRepository.getContactsOfUser(ownerId);
     }
+
+    public boolean isBlocked(String ownerId, String contactId) {
+
+        Contact contact = contactRepository.findContact(ownerId, contactId);
+
+        if (contact == null)
+            return false;
+
+        return contact.isBlocked();
+    }
+
+    public boolean isContact(String ownerId, String contactId) {
+
+        return contactRepository.findContact(ownerId, contactId) != null;
+    }
 }
