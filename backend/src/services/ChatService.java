@@ -1,10 +1,12 @@
 package services;
 
 import model.Message;
+import model.SavedMessage;
 import model.User;
 import model.Group;
 import repositories.ChatRepository;
 import repositories.GroupRepository;
+import repositories.SavedMessageRepository;
 import repositories.UserRepository;
 import repositories.ChatStatusRepository;
 
@@ -19,6 +21,7 @@ public class ChatService {
     private UserRepository userRepository;
     private GroupRepository groupRepository;
     private ChatStatusRepository chatStatusRepository;
+    private SavedMessageRepository savedMessageRepository;
 
 
     public ChatService() {
@@ -26,6 +29,7 @@ public class ChatService {
         userRepository = new UserRepository();
         groupRepository = new GroupRepository();
         chatStatusRepository = new ChatStatusRepository();
+        savedMessageRepository = new SavedMessageRepository();
     }
 
 
@@ -101,6 +105,33 @@ public class ChatService {
 
         chatRepository.saveMessage(message);
 
+
+        return "SUCCESS";
+    }
+
+    public String sendSavedMessage(String userId, String text, String mediaUrl) {
+
+        String messageId = UUID.randomUUID().toString();
+        User user = userRepository.findById(userId);
+
+        if(user == null)
+            return "User not found.";
+
+        if((text == null || text.trim().isEmpty()) &&
+            (mediaUrl == null || mediaUrl.trim().isEmpty()))
+                return "Message cannot be empty.";
+                
+        String chatId = "saved_" + userId;
+
+        Message message = new Message(messageId, userId, text,
+                            System.currentTimeMillis(), chatId);
+
+        message.setMediaUrl(mediaUrl);
+
+        chatRepository.saveMessage(message);
+
+        SavedMessage saveMessage =  new SavedMessage(userId, chatId, messageId);
+        savedMessageRepository.save(saveMessage);
 
         return "SUCCESS";
     }
@@ -433,4 +464,34 @@ public String createGroupChat(String groupId, String groupName, String adminId, 
 
     return "group_" + groupId;
     }
+
+
+    public String saveSavedMessage(String userId, String chatId, String messageId) {
+
+        Message message = chatRepository.findMessageById(chatId, messageId);
+
+        if(message==null)
+            return "Message not found.";
+
+        SavedMessage saved = new SavedMessage(userId, chatId, messageId);
+        savedMessageRepository.save(saved);
+
+        return "SUCCESS";
+
+    }
+
+    public List<Message> getSavedMessages(String userId) {
+
+        List<Message> result = new ArrayList<>();
+        List<SavedMessage> saved = savedMessageRepository.getUserSavedMessages(userId);
+        for(SavedMessage s : saved) {
+            Message message = chatRepository.findMessageById(s.getChatId(), s.getMessageId());
+            if(message!=null)
+                result.add(message);
+        }
+
+    return result;
+
+    }
+
 }

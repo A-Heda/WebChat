@@ -268,3 +268,33 @@ button {
     font-weight:bold;
     color:#4f8cff;
 }
+
+.folder-icon{
+    width:48px;
+    height:48px;
+    border-radius:50%;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+}
+
+.folder-icon.saved{
+    background:#e8f0ff;
+    color:#356dff;
+}
+
+.saved-avatar{
+    width:48px;
+    height:48px;
+    border-radius:50%;
+    background:#e8f0ff;
+
+    display:flex;
+    justify-content:center;
+    align-items:center;
+
+    color:#356dff;
+    font-size:22px;
+
+    flex-shrink:0;
+}

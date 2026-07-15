@@ -1,6 +1,7 @@
 const API = "http://localhost:8080";
 
-let lastMessageCount = 0;
+let lastChatMessageCount = 0;
+let lastSavedMessageCount = 0;
 
 const params =
     new URLSearchParams(window.location.search);
@@ -37,6 +38,28 @@ const homeButton = document.getElementById("home-btn");
 /* Page Load */
 
 window.onload = async function () {
+
+    if(chatType === "SAVED"){
+
+    chatName.textContent = "Saved Messages";
+
+    chatSubtitle.textContent =
+        "Only you can see these messages";
+
+    const avatar = document.getElementById("chat-avatar");
+
+    avatar.outerHTML = `
+        <div id="chat-avatar" class="saved-avatar">
+            <i class="fa-solid fa-bookmark"></i>
+        </div>
+    `;
+
+    await loadSavedMessages();
+
+    setInterval(loadSavedMessages,3000);
+
+    return;
+    }
 
     if (!chatId) {
 
@@ -175,9 +198,9 @@ async function loadMessages() {
 
         if (response.ok) {
 
-            if (messages.length !== lastMessageCount) {
+            if (messages.length !== lastChatMessageCount) {
 
-            lastMessageCount = messages.length;
+            lastChatMessageCount = messages.length;
         
             renderMessages(messages);
             }
@@ -193,6 +216,43 @@ async function loadMessages() {
 
         alert("Cannot load messages.");
     }
+}
+
+async function loadSavedMessages(){
+
+    try{
+
+        const response =
+        await fetch(
+            API +
+            "/chats/saved?userId=" +
+            currentUserId
+        );
+
+        const messages =
+        await response.json();
+
+        if(response.ok){
+
+            if(messages.length !== lastSavedMessageCount){
+
+                lastSavedMessageCount = messages.length;
+                renderMessages(messages);
+
+            }
+
+        }else{
+
+            alert(messages);
+
+        }
+
+    }catch(error){
+
+        console.error(error);
+
+    }
+
 }
 
 /* Render Messages */
@@ -279,6 +339,12 @@ function renderMessages(messages) {
 
 async function sendMessage() {
 
+    if(chatType === "SAVED"){
+
+        return sendSavedMessage();
+
+    }
+
     const text =
         messageInput.value.trim();
 
@@ -334,6 +400,50 @@ async function sendMessage() {
     }
 }
 
+async function sendSavedMessage(){
+
+    const text =
+        messageInput.value.trim();
+
+    if(!text)
+        return;
+
+    const response =
+        await fetch(API+"/chats/saved/send",{
+
+            method:"POST",
+
+            headers:{
+                "Content-Type":"application/json"
+            },
+
+            body:JSON.stringify({
+
+                userId:currentUserId,
+
+                text:text
+
+            })
+
+        });
+
+    const result =
+        await response.json();
+
+    if(response.ok){
+
+        messageInput.value="";
+
+        await loadSavedMessages();
+
+    }else{
+
+        alert(result);
+
+    }
+
+}
+
 function toggleMenu(event,messageId,isMine){
 
     event.stopPropagation();
@@ -351,7 +461,17 @@ function toggleMenu(event,messageId,isMine){
         "menu-"+messageId
     );
 
-    if(isMine){
+    if(chatType === "SAVED"){
+
+    menu.innerHTML = `
+        <div onclick="deleteMessage('${messageId}')">
+            🗑 Delete
+        </div>
+        `;
+
+    }
+
+    else if(isMine){
 
         menu.innerHTML =
 
@@ -362,6 +482,10 @@ function toggleMenu(event,messageId,isMine){
 
         <div onclick="deleteMessage('${messageId}')">
             🗑 Delete
+        </div>
+
+        <div onclick="saveMessage('${messageId}')">
+            🔖 Save
         </div>
 
         <div onclick="reportMessage('${messageId}')">
@@ -376,6 +500,9 @@ function toggleMenu(event,messageId,isMine){
         `
         <div onclick="reportMessage('${messageId}')">
             🚩 Report
+        </div>
+        <div onclick="saveMessage('${messageId}')">
+            🔖 Save
         </div>
         `;
     }
@@ -435,6 +562,28 @@ async function editMessage(messageId){
 
     }
 
+}
+
+async function saveMessage(messageId) {
+    const response = await fetch(API + "/chats/save", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            userId: currentUserId,
+            chatId: chatId,
+            messageId: messageId
+        })
+    });
+
+    const result = await response.json();
+
+    if (response.ok) {
+        alert("Saved");
+    } else {
+        alert(result);
+    }
 }
 
 async function deleteMessage(messageId){
@@ -541,6 +690,9 @@ homeButton.onclick =
     };
 
 openInfo.onclick = function () {
+
+    if(chatType === "SAVED")
+        return;
 
     if (!otherUserId)
         return;

@@ -148,11 +148,11 @@ public class ChatRepository {
         }
     }
 
-    public void saveMessage (Message message) {
+    public void saveMessage (Message message) {               //writes a message in database          
         File chatsDirectory = new File(CHATS_DIRECTORY);
 
         if(!chatsDirectory.exists()) {
-        chatsDirectory.mkdirs();
+            chatsDirectory.mkdirs();
         }
 
         String chatId = message.getChatId();

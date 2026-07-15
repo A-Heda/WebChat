@@ -479,7 +479,8 @@ function logout() {
 
 function openSavedMessages() {
 
-    alert("Coming Soon");
+    window.location.href =
+        "../chat/chat.html?id=saved&type=SAVED";
 }
 
 function openSettings() {

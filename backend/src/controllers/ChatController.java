@@ -150,6 +150,36 @@ public class ChatController implements HttpHandler {
 
                 break;
 
+            case "/chats/save":
+
+                if(method.equals("POST")){
+                    saveMessage(exchange);
+                } else {
+                    sendResponse(exchange,"Method not allowed",405);
+                }
+
+                break;
+
+            case "/chats/saved":
+
+                if(method.equals("GET")){
+                    getSavedMessages(exchange);
+                } else {
+                    sendResponse(exchange,"Method not allowed",405);
+                }
+
+                break;
+
+            case "/chats/saved/send":
+
+                if(method.equals("POST")){
+                    sendSavedMessage(exchange);
+                } else {
+                    sendResponse(exchange,"Method not allowed",405);
+                }
+
+                break;
+
             // case "/chsts/cerate-group" : added the group creation feature to group
             // controller
 
@@ -451,6 +481,75 @@ private void pinChat(HttpExchange exchange) throws IOException {
     sendResponse(exchange,"SUCCESS",200);
 
 }
+
+    private void saveMessage(HttpExchange exchange) throws IOException {
+
+        BufferedReader reader = new BufferedReader(new InputStreamReader(exchange.getRequestBody()));
+        JsonObject json = gson.fromJson(reader,JsonObject.class);
+
+        String userId = json.get("userId").getAsString();
+        String chatId = json.get("chatId").getAsString();
+        String messageId = json.get("messageId").getAsString();
+
+        String result = chatService.saveSavedMessage(userId, chatId, messageId);
+
+        if(result.equals("SUCCESS")) {
+            sendResponse(exchange, result, 200);
+        } else {
+            sendResponse(exchange, result, 400);
+        }
+    }
+
+    private void getSavedMessages(HttpExchange exchange) throws IOException {
+        String query = exchange.getRequestURI().getQuery();
+
+        if (query == null || !query.startsWith("userId=")) {
+            sendResponse(exchange, "Missing userId", 400);
+            return;
+        }
+
+        String userId = query.substring("userId=".length());
+        List<Message> messages = chatService.getSavedMessages(userId);
+        JsonArray result = new JsonArray();
+
+        for (Message message : messages) {
+            JsonObject json = gson.toJsonTree(message).getAsJsonObject();
+            User sender = userService.findUserById(message.getSenderId());
+
+            if (sender != null) {
+                json.addProperty("senderUsername", sender.getUsername());
+                json.addProperty("senderImagePath", sender.getProfileImagePath());
+            } else {
+                json.addProperty("senderUsername", "Unknown");
+                json.addProperty("senderImagePath", "../assets/default-avatar.png");
+            }
+
+        result.add(json);
+    }
+
+    sendResponse(exchange, result, 200);
+}
+
+
+    // POST /chats/saved/send
+    private void sendSavedMessage(HttpExchange exchange) throws IOException {
+
+        BufferedReader reader = new BufferedReader(new InputStreamReader(exchange.getRequestBody()));
+
+        JsonObject json = gson.fromJson(reader, JsonObject.class);
+
+        String userId = json.get("userId").getAsString();
+
+        String text = json.get("text").getAsString();
+
+        String result = chatService.sendSavedMessage(userId, text, null);          //null for now
+
+        if ("SUCCESS".equals(result)) {
+            sendResponse(exchange, result, 200);
+        } else {
+            sendResponse(exchange, result, 400);
+        }
+    }
 
     private void sendResponse(HttpExchange exchange,
             Object data,
