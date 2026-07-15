@@ -35,6 +35,136 @@ const backButton = document.getElementById("back-btn");
 
 const homeButton = document.getElementById("home-btn");
 
+const mediaInput = document.getElementById("media-input");
+
+const mediaButton = document.getElementById("media-btn");
+
+mediaButton.onclick = function () {
+
+    mediaInput.click();
+
+};
+
+
+document.getElementById("media-input").addEventListener("change", async function () {
+
+    const file = this.files[0];
+
+    if (!file)
+        return;
+
+    const reader = new FileReader();
+
+    reader.onload = async function () {
+
+        const base64 =
+            reader.result.split(",")[1];
+
+        await uploadMedia(
+            file.name,
+            file.type,
+            base64
+        );
+
+    };
+
+    reader.readAsDataURL(file);
+
+});
+
+async function uploadMedia(fileName, type, data){
+
+    const response =
+        await fetch(API + "/media/upload",{
+
+            method:"POST",
+
+            headers:{
+                "Content-Type":"application/json"
+            },
+
+            body:JSON.stringify({
+
+                fileName:fileName,
+
+                contentType:type,
+
+                data:data
+
+            })
+
+        });
+
+    const result =
+        await response.json();
+
+    if(response.ok){
+
+        mediaInput.value = "";
+
+        await sendMedia(result.url);
+
+    }
+
+    else{
+
+        alert(result);
+
+    }
+
+}
+
+async function sendMedia(mediaUrl){
+
+    let endpoint;
+
+    let body;
+
+    if(chatType === "SAVED"){
+
+        endpoint = API + "/chats/saved/send";
+
+        body = {
+            userId: currentUserId,
+            text: "",
+            mediaUrl: mediaUrl
+        };
+
+    }else{
+
+        endpoint = API + "/chats/media";
+
+        body = {
+            senderId: currentUserId,
+            chatId: chatId,
+            mediaUrl: mediaUrl
+        };
+
+    }
+
+    const response = await fetch(endpoint,{
+        method:"POST",
+        headers:{
+            "Content-Type":"application/json"
+        },
+        body:JSON.stringify(body)
+    });
+
+    if(response.ok){
+
+        if(chatType==="SAVED")
+            loadSavedMessages();
+        else
+            loadMessages();
+
+    }else{
+
+        alert(await response.json());
+
+    }
+}
+
+
 /* Page Load */
 
 window.onload = async function () {
@@ -303,11 +433,13 @@ function renderMessages(messages) {
 
             <div class="message-text">
 
-            ${message.text}
+                ${message.text || ""}
 
-                        ${message.edited ? "<span class='edited'>(edited)</span>" : ""}
+                ${message.edited ? "<span class='edited'>(edited)</span>" : ""}
 
-                    </div>
+            </div>
+
+            ${renderMedia(message)}
 
                     <button
                         class="menu-btn"
@@ -332,6 +464,56 @@ function renderMessages(messages) {
 
     messagesContainer.scrollTop =
         messagesContainer.scrollHeight;
+}
+
+
+function renderMedia(message) {
+
+    if (!message.mediaUrl)
+        return "";
+
+    const url = API + message.mediaUrl;
+
+    if (message.mediaUrl.match(/\.(png|jpg|jpeg|gif|webp)$/i)) {
+
+        return `
+            <img
+                class="chat-image"
+                src="${url}">
+        `;
+    }
+
+    if (message.mediaUrl.match(/\.(mp4|webm|mov)$/i)) {
+
+        return `
+            <video
+                class="chat-video"
+                controls>
+
+                <source src="${url}">
+
+            </video>
+        `;
+    }
+
+    if (message.mediaUrl.match(/\.(mp3|wav|ogg)$/i)) {
+
+        return `
+            <audio controls>
+
+                <source src="${url}">
+
+            </audio>
+        `;
+    }
+
+    return `
+        <a href="${url}" target="_blank">
+
+            📄 Download File
+
+        </a>
+    `;
 }
 
 /* Send Message */

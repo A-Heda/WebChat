@@ -180,6 +180,16 @@ public class ChatController implements HttpHandler {
 
                 break;
 
+            case "/chats/media":
+
+                if(method.equals("POST")){
+                    sendMedia(exchange);
+                } else {
+                    sendResponse(exchange,"Method not allowed",405);
+                }
+
+                break;
+
             // case "/chsts/cerate-group" : added the group creation feature to group
             // controller
 
@@ -540,9 +550,15 @@ private void pinChat(HttpExchange exchange) throws IOException {
 
         String userId = json.get("userId").getAsString();
 
-        String text = json.get("text").getAsString();
+        String text = "";
+        if(json.has("text"))
+            text = json.get("text").getAsString();
 
-        String result = chatService.sendSavedMessage(userId, text, null);          //null for now
+        String mediaUrl = null;
+        if(json.has("mediaUrl"))
+            mediaUrl = json.get("mediaUrl").getAsString();
+
+        String result = chatService.sendSavedMessage(userId, text, mediaUrl);
 
         if ("SUCCESS".equals(result)) {
             sendResponse(exchange, result, 200);
@@ -550,6 +566,35 @@ private void pinChat(HttpExchange exchange) throws IOException {
             sendResponse(exchange, result, 400);
         }
     }
+
+    private void sendMedia(HttpExchange exchange) throws IOException {
+    BufferedReader requestReader =
+        new BufferedReader(new InputStreamReader(exchange.getRequestBody()));
+
+    JsonObject requestBody = gson.fromJson(requestReader, JsonObject.class);
+    
+    if(!requestBody.has("mediaUrl")){
+        sendResponse(exchange,"Missing mediaUrl",400);
+        return;
+    }
+
+    String senderUserId = requestBody.get("senderId").getAsString();
+    String targetChatId = requestBody.get("chatId").getAsString();
+    String mediaFileUrl = requestBody.get("mediaUrl").getAsString();
+
+    String sendResult = chatService.sendMedia(
+        targetChatId,
+        senderUserId,
+        mediaFileUrl
+    );
+
+    if (sendResult.equals("SUCCESS")) {
+        sendResponse(exchange, sendResult, 200);
+    } else {
+        sendResponse(exchange, sendResult, 400);
+    }
+}
+
 
     private void sendResponse(HttpExchange exchange,
             Object data,

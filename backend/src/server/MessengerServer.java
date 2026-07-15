@@ -3,6 +3,7 @@ package server;
 import com.sun.net.httpserver.HttpServer;
 import controllers.UserController;
 import controllers.GroupController;
+import controllers.MediaController;
 import controllers.ChatController;
 import controllers.ContactController;
 
@@ -25,6 +26,9 @@ public class MessengerServer {
             server.createContext("/chats",new ChatController());
 
             server.createContext("/contacts", new ContactController());
+            
+            server.createContext("/media", new MediaController());
+
             
             server.setExecutor(Executors.newFixedThreadPool(10));
             server.start();
