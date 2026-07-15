@@ -10,6 +10,7 @@ import model.Group;
 import services.ChatPreview;
 import services.ChatService;
 import services.ChatStatusService;
+import services.GroupHistoryService;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -23,11 +24,13 @@ public class GroupController implements HttpHandler {
     private Gson gson;
     private ChatService chatService;
     private ChatStatusService chatStatusService;
+    private GroupHistoryService groupHistoryService;
 
     public GroupController() {
         chatService = new ChatService();
         groupService = new GroupService();
         chatStatusService = new ChatStatusService();
+        groupHistoryService = new GroupHistoryService();
         gson = new Gson();
     }
 
@@ -77,6 +80,34 @@ public class GroupController implements HttpHandler {
                     sendResponse(exchange,
                             "Method not allowed",
                             405);
+
+                }
+
+                break;
+
+            case "/groups/history":
+
+                if (method.equals("GET")) {
+
+                    getHistory(exchange);
+
+                } else {
+
+                    sendResponse(exchange, "Method not allowed", 405);
+
+                }
+
+                break;
+
+            case "/groups/edit":
+
+                if (method.equals("PUT")) {
+
+                    editGroup(exchange);
+
+                } else {
+
+                    sendResponse(exchange, "Method not allowed", 405);
 
                 }
 
@@ -383,5 +414,65 @@ public class GroupController implements HttpHandler {
                         "group_" + groupId));
 
         sendResponse(exchange, response, 200);
+    }
+
+    private void getHistory(HttpExchange exchange)
+            throws IOException {
+
+        String query = exchange.getRequestURI().getQuery();
+
+        if (query == null || !query.startsWith("groupId=")) {
+
+            sendResponse(exchange,
+                    "Missing groupId",
+                    400);
+
+            return;
+        }
+
+        String groupId = query.substring("groupId=".length());
+
+        sendResponse(
+
+                exchange,
+
+                groupHistoryService.getHistory(groupId),
+
+                200
+
+        );
+
+    }
+
+    private void editGroup(HttpExchange exchange)
+            throws IOException {
+
+        BufferedReader reader = new BufferedReader(
+                new InputStreamReader(
+                        exchange.getRequestBody()));
+
+        JsonObject json = gson.fromJson(reader, JsonObject.class);
+
+        String groupId = json.get("groupId").getAsString();
+
+        String newGroupName = json.get("newGroupName").getAsString();
+
+        String imagePath = json.get("imagePath").getAsString();
+
+        String result = groupService.editGroup(
+                groupId,
+                newGroupName,
+                imagePath);
+
+        if (result.equals("SUCCESS")) {
+
+            sendResponse(exchange, result, 200);
+
+        } else {
+
+            sendResponse(exchange, result, 400);
+
+        }
+
     }
 }
