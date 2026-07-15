@@ -290,16 +290,15 @@ function renderMessages(messages) {
                 <div class="message-body">
 
                     ${
-        chatType === "GROUP" ? `
-                <div class="sender-header">
-                    <img class="sender-avatar"
+        (chatType === "GROUP" || chatType === "SAVED") ? `
+            <div class="sender-header">
+                <img class="sender-avatar"
                     src="${message.senderImagePath || "../assets/default-avatar.png"}">
                     <span class="sender-name">
-                     ${message.senderUsername}
+                        ${message.senderUsername || "Unknown"}
                     </span>
-
-                </div>
-                        ` : ""
+            </div>
+        ` : ""
 }
 
             <div class="message-text">
