@@ -22,7 +22,7 @@ public class ChatService {
     private ChatStatusRepository chatStatusRepository;
     private SavedMessageRepository savedMessageRepository;
     private BlockService blockService;
-
+    private GroupHistoryService groupHistoryService;
 
     public ChatService() {
         chatRepository = new ChatRepository();
@@ -31,6 +31,7 @@ public class ChatService {
         chatStatusRepository = new ChatStatusRepository();
         savedMessageRepository = new SavedMessageRepository();
         blockService = new BlockService();
+        groupHistoryService = new GroupHistoryService();
     }
 
     private String validateMessage(String text) {
@@ -129,28 +130,27 @@ public class ChatService {
         String messageId = UUID.randomUUID().toString();
         User user = userRepository.findById(userId);
 
-        if(user == null)
+        if (user == null)
             return "User not found.";
 
-        if((text == null || text.trim().isEmpty()) &&
-            (mediaUrl == null || mediaUrl.trim().isEmpty()))
-                return "Message cannot be empty.";
-                
+        if ((text == null || text.trim().isEmpty()) &&
+                (mediaUrl == null || mediaUrl.trim().isEmpty()))
+            return "Message cannot be empty.";
+
         String chatId = "saved_" + userId;
 
         Message message = new Message(messageId, userId, text,
-                            System.currentTimeMillis(), chatId);
+                System.currentTimeMillis(), chatId);
 
         message.setMediaUrl(mediaUrl);
 
         chatRepository.saveMessage(message);
 
-        SavedMessage saveMessage =  new SavedMessage(userId, chatId, messageId);
+        SavedMessage saveMessage = new SavedMessage(userId, chatId, messageId);
         savedMessageRepository.save(saveMessage);
 
         return "SUCCESS";
     }
-
 
     public String sendMedia(String chatId,
             String senderId,
@@ -201,6 +201,21 @@ public class ChatService {
         if (!response.equals("Message is valid."))
             return response;
 
+        // فقط برای گروه
+        if (chatId.startsWith("group_")) {
+
+            groupHistoryService.saveHistory(
+
+                    chatId,
+                    message.getId(),
+                    message.getSenderId(),
+                    message.getText(), // متن قبل از ادیت
+                    "EDIT"
+
+            );
+
+        }
+
         message.setPreviousContent(message.getText());
 
         message.setText(newText);
@@ -214,15 +229,30 @@ public class ChatService {
 
     public String deleteMessage(String chatId,
             String messageId,
-            String userId) {
+            String requesterId) {
 
         Message message = chatRepository.findMessageById(chatId, messageId);
 
         if (message == null)
             return "Message not found.";
 
-        if (!message.getSenderId().equals(userId))
+        if (!message.getSenderId().equals(requesterId))
             return "You can only delete your own messages.";
+
+        // فقط برای گروه
+        if (chatId.startsWith("group_")) {
+
+            groupHistoryService.saveHistory(
+
+                    chatId,
+                    message.getId(),
+                    message.getSenderId(),
+                    message.getText(), // متن قبل از حذف
+                    "DELETE"
+
+            );
+
+        }
 
         message.setDeleted(true);
 
@@ -427,12 +457,11 @@ public class ChatService {
         return "group_" + groupId;
     }
 
-
     public String saveSavedMessage(String userId, String chatId, String messageId) {
 
         Message message = chatRepository.findMessageById(chatId, messageId);
 
-        if(message==null)
+        if (message == null)
             return "Message not found.";
 
         SavedMessage saved = new SavedMessage(userId, chatId, messageId);
@@ -446,13 +475,13 @@ public class ChatService {
 
         List<Message> result = new ArrayList<>();
         List<SavedMessage> saved = savedMessageRepository.getUserSavedMessages(userId);
-        for(SavedMessage s : saved) {
+        for (SavedMessage s : saved) {
             Message message = chatRepository.findMessageById(s.getChatId(), s.getMessageId());
-            if(message!=null)
+            if (message != null)
                 result.add(message);
         }
 
-    return result;
+        return result;
 
     }
 

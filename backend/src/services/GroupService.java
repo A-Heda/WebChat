@@ -6,7 +6,6 @@ import repositories.ChatRepository;
 import repositories.GroupRepository;
 import repositories.UserRepository;
 
-
 import java.util.*;
 
 public class GroupService {
@@ -110,7 +109,19 @@ public class GroupService {
 
     public String leaveGroup(String groupId, String userId) {
 
-        return removeMember(groupId, userId);
+        Group group = groupRepository.findById(groupId);
+
+        if (group == null)
+            return "Group not found.";
+
+        if (!group.getMemberIds().contains(userId))
+            return "You are not a member.";
+
+        group.getMemberIds().remove(userId);
+
+        groupRepository.updateGroup(group);
+
+        return "SUCCESS";
     }
 
     public String deleteGroup(String groupId, String requesterId) {
@@ -180,6 +191,35 @@ public class GroupService {
         }
 
         return result;
+    }
+
+    public String editGroup(String groupId,
+            String newGroupName,
+            String imagePath) {
+
+        Group group = groupRepository.findById(groupId);
+
+        if (group == null)
+            return "Group not found.";
+
+        if (newGroupName != null && !newGroupName.trim().isEmpty()) {
+
+            String response = validateGroupName(newGroupName);
+
+            if (!response.equals("Group name is valid."))
+                return response;
+
+            group.setName(newGroupName);
+        }
+
+        if (imagePath != null && !imagePath.trim().isEmpty()) {
+
+            group.setGroupImagePath(imagePath);
+        }
+
+        groupRepository.updateGroup(group);
+
+        return "SUCCESS";
     }
 
     public String changeGroupImage(String groupId, String imagePath) {

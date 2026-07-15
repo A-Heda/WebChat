@@ -39,26 +39,26 @@ const homeButton = document.getElementById("home-btn");
 
 window.onload = async function () {
 
-    if(chatType === "SAVED"){
+    if (chatType === "SAVED") {
 
-    chatName.textContent = "Saved Messages";
+        chatName.textContent = "Saved Messages";
 
-    chatSubtitle.textContent =
-        "Only you can see these messages";
+        chatSubtitle.textContent =
+            "Only you can see these messages";
 
-    const avatar = document.getElementById("chat-avatar");
+        const avatar = document.getElementById("chat-avatar");
 
-    avatar.outerHTML = `
+        avatar.outerHTML = `
         <div id="chat-avatar" class="saved-avatar">
             <i class="fa-solid fa-bookmark"></i>
         </div>
     `;
 
-    await loadSavedMessages();
+        await loadSavedMessages();
 
-    setInterval(loadSavedMessages,3000);
+        setInterval(loadSavedMessages, 3000);
 
-    return;
+        return;
     }
 
     if (!chatId) {
@@ -71,13 +71,13 @@ window.onload = async function () {
         return;
     }
 
-    if(chatType === "GROUP"){
+    if (chatType === "GROUP") {
 
-    await loadGroupInfo();
+        await loadGroupInfo();
 
-    }else{
+    } else {
 
-    await loadChatInfo();
+        await loadChatInfo();
     }
 
     await loadMessages();
@@ -129,6 +129,7 @@ async function loadChatInfo() {
 }
 
 /* Load GroupChat Header */
+/* Load GroupChat Header */
 async function loadGroupInfo() {
 
     try {
@@ -139,7 +140,7 @@ async function loadGroupInfo() {
         const response =
             await fetch(
                 API +
-                "/groups/info?groupId=" +
+                "/groups/id?groupId=" +
                 groupId
             );
 
@@ -148,24 +149,22 @@ async function loadGroupInfo() {
 
         if (response.ok) {
 
-            otherUserId =
-                group.otherUserId;
-
-            otherUsername =
-                group.otherUsername;
+            // برای صفحه Group Info
+            otherUserId = group.id;
 
             chatName.textContent =
-                group.otherUsername;
+                group.name;
 
             chatSubtitle.textContent =
-                "Group ID: " +
-                group.otherUserId;
+                "Group ID: " + group.id;
 
             document
                 .getElementById("chat-avatar")
                 .src =
-                group.imagePath ||
-                "../assets/group.png";
+                group.groupImagePath &&
+                    group.groupImagePath.trim() !== ""
+                    ? group.groupImagePath
+                    : "../assets/group.png";
 
         } else {
 
@@ -200,9 +199,9 @@ async function loadMessages() {
 
             if (messages.length !== lastChatMessageCount) {
 
-            lastChatMessageCount = messages.length;
-        
-            renderMessages(messages);
+                lastChatMessageCount = messages.length;
+
+                renderMessages(messages);
             }
 
         } else {
@@ -218,36 +217,36 @@ async function loadMessages() {
     }
 }
 
-async function loadSavedMessages(){
+async function loadSavedMessages() {
 
-    try{
+    try {
 
         const response =
-        await fetch(
-            API +
-            "/chats/saved?userId=" +
-            currentUserId
-        );
+            await fetch(
+                API +
+                "/chats/saved?userId=" +
+                currentUserId
+            );
 
         const messages =
-        await response.json();
+            await response.json();
 
-        if(response.ok){
+        if (response.ok) {
 
-            if(messages.length !== lastSavedMessageCount){
+            if (messages.length !== lastSavedMessageCount) {
 
                 lastSavedMessageCount = messages.length;
                 renderMessages(messages);
 
             }
 
-        }else{
+        } else {
 
             alert(messages);
 
         }
 
-    }catch(error){
+    } catch (error) {
 
         console.error(error);
 
@@ -289,8 +288,7 @@ function renderMessages(messages) {
             html = `
                 <div class="message-body">
 
-                    ${
-        (chatType === "GROUP" || chatType === "SAVED") ? `
+                    ${(chatType === "GROUP" || chatType === "SAVED") ? `
             <div class="sender-header">
                 <img class="sender-avatar"
                     src="${message.senderImagePath || "../assets/default-avatar.png"}">
@@ -299,7 +297,7 @@ function renderMessages(messages) {
                     </span>
             </div>
         ` : ""
-}
+                }
 
             <div class="message-text">
 
@@ -338,7 +336,7 @@ function renderMessages(messages) {
 
 async function sendMessage() {
 
-    if(chatType === "SAVED"){
+    if (chatType === "SAVED") {
 
         return sendSavedMessage();
 
@@ -399,28 +397,28 @@ async function sendMessage() {
     }
 }
 
-async function sendSavedMessage(){
+async function sendSavedMessage() {
 
     const text =
         messageInput.value.trim();
 
-    if(!text)
+    if (!text)
         return;
 
     const response =
-        await fetch(API+"/chats/saved/send",{
+        await fetch(API + "/chats/saved/send", {
 
-            method:"POST",
+            method: "POST",
 
-            headers:{
-                "Content-Type":"application/json"
+            headers: {
+                "Content-Type": "application/json"
             },
 
-            body:JSON.stringify({
+            body: JSON.stringify({
 
-                userId:currentUserId,
+                userId: currentUserId,
 
-                text:text
+                text: text
 
             })
 
@@ -429,13 +427,13 @@ async function sendSavedMessage(){
     const result =
         await response.json();
 
-    if(response.ok){
+    if (response.ok) {
 
-        messageInput.value="";
+        messageInput.value = "";
 
         await loadSavedMessages();
 
-    }else{
+    } else {
 
         alert(result);
 
@@ -443,26 +441,26 @@ async function sendSavedMessage(){
 
 }
 
-function toggleMenu(event,messageId,isMine){
+function toggleMenu(event, messageId, isMine) {
 
     event.stopPropagation();
 
     document
-    .querySelectorAll(".message-menu")
-    .forEach(menu=>{
+        .querySelectorAll(".message-menu")
+        .forEach(menu => {
 
-        menu.classList.add("hidden");
+            menu.classList.add("hidden");
 
-    });
+        });
 
     const menu =
-    document.getElementById(
-        "menu-"+messageId
-    );
+        document.getElementById(
+            "menu-" + messageId
+        );
 
-    if(chatType === "SAVED"){
+    if (chatType === "SAVED") {
 
-    menu.innerHTML = `
+        menu.innerHTML = `
         <div onclick="deleteMessage('${messageId}')">
             🗑 Delete
         </div>
@@ -470,11 +468,11 @@ function toggleMenu(event,messageId,isMine){
 
     }
 
-    else if(isMine){
+    else if (isMine) {
 
         menu.innerHTML =
 
-        `
+            `
         <div onclick="editMessage('${messageId}')">
             ✏️ Edit
         </div>
@@ -492,11 +490,11 @@ function toggleMenu(event,messageId,isMine){
         </div>
         `;
 
-    }else{
+    } else {
 
-        menu.innerHTML=
+        menu.innerHTML =
 
-        `
+            `
         <div onclick="reportMessage('${messageId}')">
             🚩 Report
         </div>
@@ -509,53 +507,53 @@ function toggleMenu(event,messageId,isMine){
     menu.classList.toggle("hidden");
 }
 
-window.onclick=function(){
+window.onclick = function () {
 
     document
-    .querySelectorAll(".message-menu")
-    .forEach(menu=>{
+        .querySelectorAll(".message-menu")
+        .forEach(menu => {
 
-        menu.classList.add("hidden");
+            menu.classList.add("hidden");
 
-    });
+        });
 
 }
 
-async function editMessage(messageId){
+async function editMessage(messageId) {
 
-    const newText=
-    prompt("Edit message");
+    const newText =
+        prompt("Edit message");
 
-    if(newText==null)
+    if (newText == null)
         return;
 
     const response =
-    await fetch(API+"/chats/edit",{
+        await fetch(API + "/chats/edit", {
 
-        method:"PUT",
+            method: "PUT",
 
-        headers:{
-            "Content-Type":"application/json"
-        },
+            headers: {
+                "Content-Type": "application/json"
+            },
 
-        body:JSON.stringify({
+            body: JSON.stringify({
 
-            chatId:chatId,
+                chatId: chatId,
 
-            messageId:messageId,
+                messageId: messageId,
 
-            editorId:currentUserId,
+                editorId: currentUserId,
 
-            newText:newText
-        })
+                newText: newText
+            })
 
-    });
+        });
 
-    if(response.ok){
+    if (response.ok) {
 
         loadMessages();
 
-    }else{
+    } else {
 
         alert(await response.json());
 
@@ -585,37 +583,37 @@ async function saveMessage(messageId) {
     }
 }
 
-async function deleteMessage(messageId){
+async function deleteMessage(messageId) {
 
-    if(!confirm("Delete message?"))
+    if (!confirm("Delete message?"))
         return;
 
     const response =
-    await fetch(API+"/chats/delete",{
+        await fetch(API + "/chats/delete", {
 
-        method:"DELETE",
+            method: "DELETE",
 
-        headers:{
-            "Content-Type":"application/json"
-        },
+            headers: {
+                "Content-Type": "application/json"
+            },
 
-        body:JSON.stringify({
+            body: JSON.stringify({
 
-            chatId:chatId,
+                chatId: chatId,
 
-            messageId:messageId,
+                messageId: messageId,
 
-            requesterId:currentUserId
+                requesterId: currentUserId
 
-        })
+            })
 
-    });
+        });
 
-    if(response.ok){
+    if (response.ok) {
 
         loadMessages();
 
-    }else{
+    } else {
 
         alert(await response.json());
 
@@ -623,34 +621,34 @@ async function deleteMessage(messageId){
 
 }
 
-async function reportMessage(messageId){
+async function reportMessage(messageId) {
 
-    const response=
-    await fetch(API+"/chats/report",{
+    const response =
+        await fetch(API + "/chats/report", {
 
-        method:"POST",
+            method: "POST",
 
-        headers:{
-            "Content-Type":"application/json"
-        },
+            headers: {
+                "Content-Type": "application/json"
+            },
 
-        body:JSON.stringify({
+            body: JSON.stringify({
 
-            chatId:chatId,
+                chatId: chatId,
 
-            messageId:messageId,
+                messageId: messageId,
 
-            reporterId:currentUserId
+                reporterId: currentUserId
 
-        })
+            })
 
-    });
+        });
 
-    if(response.ok){
+    if (response.ok) {
 
         alert("Reported.");
 
-    }else{
+    } else {
 
         alert(await response.json());
 
@@ -690,22 +688,22 @@ homeButton.onclick =
 
 openInfo.onclick = function () {
 
-    if(chatType === "SAVED")
+    if (chatType === "SAVED")
         return;
 
     if (!otherUserId)
         return;
 
-    if(chatType==="PRIVATE"){
+    if (chatType === "PRIVATE") {
 
-    window.location.href =
-    "../user-info/user-info.html?id="+
-    otherUserId;
+        window.location.href =
+            "../user-info/user-info.html?id=" +
+            otherUserId;
 
-}else{
+    } else {
 
-    window.location.href =
-    "../group-info/group-info.html?id="+
-    otherUserId;
-}
+        window.location.href =
+            "../group-info/group-info.html?groupId=" +
+            otherUserId;
+    }
 };

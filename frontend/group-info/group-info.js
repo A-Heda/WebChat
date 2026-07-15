@@ -10,6 +10,7 @@ window.onload = function () {
 
     loadGroup();
     checkStatus();
+    loadArchiveStatus();
 }
 
 async function loadGroup() {
@@ -28,6 +29,9 @@ async function loadGroup() {
     document.getElementById("group-name").textContent =
         group.groupName;
 
+    document.getElementById("group-id").textContent =
+        "Group ID: " + group.id;
+
     document.getElementById("members").textContent =
         group.memberIds.length + " members";
 
@@ -37,6 +41,32 @@ async function loadGroup() {
         document.getElementById("avatar").src =
             group.groupImagePath;
     }
+}
+
+async function loadArchiveStatus() {
+
+    const userId = localStorage.getItem("userId");
+
+    const response =
+        await fetch(
+            API +
+            "/users/status?ownerId=" +
+            userId +
+            "&contactId=&chatId=group_" +
+            groupId
+        );
+
+    const status =
+        await response.json();
+
+    archived = status.archived;
+
+    document.querySelector(
+        'button[onclick="openArchive()"]'
+    ).textContent =
+        archived
+            ? "Remove from Archive"
+            : "Add to Archive";
 }
 
 function goBack() {
@@ -91,6 +121,8 @@ function editGroup() {
         groupId;
 }
 
+let archived = false;
+
 async function openArchive() {
 
     const userId =
@@ -101,26 +133,36 @@ async function openArchive() {
             API + "/users/archive",
             {
                 method: "PUT",
+
                 headers: {
                     "Content-Type": "application/json"
                 },
+
                 body: JSON.stringify({
-                    userId,
+
+                    userId: userId,
+
                     chatId: "group_" + groupId,
-                    archived: true
+
+                    archived: !archived
                 })
             }
         );
 
     if (response.ok) {
 
-        alert("Archived");
+        archived = !archived;
+        await loadArchiveStatus();
+        alert(
+            archived ?
+                "Added to archive" :
+                "Removed from archive"
+        );
 
     } else {
 
         alert("Error");
     }
-
 }
 
 async function checkStatus() {
@@ -140,16 +182,7 @@ async function checkStatus() {
     const status =
         await response.json();
 
-    if (!status.admin) {
 
-        document.querySelector(
-            'button[onclick="addMember()"]'
-        ).style.display = "none";
-
-        document.querySelector(
-            'button[onclick="editGroup()"]'
-        ).style.display = "none";
-    }
 }
 
 function openHistory() {
