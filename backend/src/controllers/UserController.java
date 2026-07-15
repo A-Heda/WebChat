@@ -9,7 +9,9 @@ import model.User;
 import services.ContactService;
 import services.GroupService;
 import services.UserService;
+import services.BlockService;
 import services.ChatStatusService;
+import services.BlockService;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -22,6 +24,7 @@ public class UserController implements HttpHandler {
 
     private ChatStatusService chatStatusService;
     private GroupService groupService;
+    private BlockService blockService;
 
     public UserController() {
         userService = new UserService();
@@ -29,6 +32,7 @@ public class UserController implements HttpHandler {
         contactService = new ContactService();
         chatStatusService = new ChatStatusService();
         groupService = new GroupService();
+        blockService = new BlockService();
     }
 
     @Override
@@ -96,8 +100,6 @@ public class UserController implements HttpHandler {
 
                 break;
 
-            
-
             case "/users/password":
 
                 if (method.equals("PUT")) {
@@ -112,6 +114,16 @@ public class UserController implements HttpHandler {
 
                 if (method.equals("PUT")) {
                     updateProfileImage(exchange);
+                } else {
+                    sendResponse(exchange, "Method not allowed", 405);
+                }
+
+                break;
+
+            case "/users/remove-contact":
+
+                if (method.equals("DELETE")) {
+                    removeContact(exchange);
                 } else {
                     sendResponse(exchange, "Method not allowed", 405);
                 }
@@ -151,9 +163,13 @@ public class UserController implements HttpHandler {
             case "/users/block":
 
                 if (method.equals("PUT")) {
+
                     blockUser(exchange);
+
                 } else {
+
                     sendResponse(exchange, "Method not allowed", 405);
+
                 }
 
                 break;
@@ -161,9 +177,13 @@ public class UserController implements HttpHandler {
             case "/users/unblock":
 
                 if (method.equals("PUT")) {
+
                     unblockUser(exchange);
+
                 } else {
+
                     sendResponse(exchange, "Method not allowed", 405);
+
                 }
 
                 break;
@@ -334,7 +354,8 @@ public class UserController implements HttpHandler {
             sendResponse(exchange, result, 400);
     }
 
-    private void blockUser(HttpExchange exchange) throws IOException {
+    private void blockUser(HttpExchange exchange)
+            throws IOException {
 
         BufferedReader reader = new BufferedReader(
                 new InputStreamReader(exchange.getRequestBody()));
@@ -345,15 +366,13 @@ public class UserController implements HttpHandler {
 
         String contactId = json.get("contactId").getAsString();
 
-        String result = contactService.blockContact(ownerId, contactId);
+        blockService.blockUser(ownerId, contactId);
 
-        if (result.equals("SUCCESS"))
-            sendResponse(exchange, result, 200);
-        else
-            sendResponse(exchange, result, 400);
+        sendResponse(exchange, "SUCCESS", 200);
     }
 
-    private void unblockUser(HttpExchange exchange) throws IOException {
+    private void unblockUser(HttpExchange exchange)
+            throws IOException {
 
         BufferedReader reader = new BufferedReader(
                 new InputStreamReader(exchange.getRequestBody()));
@@ -364,12 +383,9 @@ public class UserController implements HttpHandler {
 
         String contactId = json.get("contactId").getAsString();
 
-        String result = contactService.unblockContact(ownerId, contactId);
+        blockService.unblockUser(ownerId, contactId);
 
-        if (result.equals("SUCCESS"))
-            sendResponse(exchange, result, 200);
-        else
-            sendResponse(exchange, result, 400);
+        sendResponse(exchange, "SUCCESS", 200);
     }
 
     private void archiveChat(HttpExchange exchange) throws IOException {
@@ -440,7 +456,7 @@ public class UserController implements HttpHandler {
 
         response.addProperty(
                 "blocked",
-                contactService.isBlocked(ownerId, contactId));
+                blockService.isBlocked(ownerId, contactId));
 
         response.addProperty(
                 "contact",

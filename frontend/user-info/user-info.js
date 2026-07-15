@@ -213,24 +213,33 @@ async function blockUser() {
 
         });
 
-    if (response.ok)
-        loadUserStatus();
+    if (response.ok) {
+
+        await loadUserStatus();
+
+    } else {
+
+        alert(await response.json());
+
+    }
 }
 
 async function addContact() {
 
-    if (isContact) {
+    const url =
+        isContact
+            ? "/users/remove-contact"
+            : "/users/contact";
 
-        alert("Remove Contact endpoint not added yet.");
-
-        return;
-
-    }
+    const method =
+        isContact
+            ? "DELETE"
+            : "POST";
 
     const response =
-        await fetch(API + "/users/contact", {
+        await fetch(API + url, {
 
-            method: "POST",
+            method: method,
 
             headers: {
                 "Content-Type": "application/json"
@@ -246,8 +255,16 @@ async function addContact() {
 
         });
 
-    if (response.ok)
+    if (response.ok) {
+
         loadUserStatus();
+
+    } else {
+
+        alert(await response.json());
+
+    }
+
 }
 
 async function archiveUser() {
@@ -273,8 +290,15 @@ async function archiveUser() {
 
         });
 
-    if (response.ok)
-        loadUserStatus();
+    if (response.ok) {
+
+        await loadUserStatus();
+
+    } else {
+
+        alert(await response.json());
+
+    }
 }
 
 function goBack() {
