@@ -1,6 +1,7 @@
 package repositories;
 
 import model.Message;
+import Encrypt.MessageEncryption;
 
 import java.util.List;
 import java.io.BufferedReader;
@@ -36,7 +37,7 @@ public class ChatRepository {
 
     return message.getId() + "|" +
             message.getSenderId() + "|" +
-            message.getText() + "|" +
+            MessageEncryption.encrypt(message.getText()) + "|" +
             message.getTimestamp() + "|" +
             message.isEdited() + "|" +
             message.isDeleted() + "|" +
@@ -55,11 +56,12 @@ public class ChatRepository {
     if(parts.length != 10)
         return null;
 
+    String decryptedMsg = MessageEncryption.decrypt(parts[2]);
 
     Message message = new Message(
             parts[0],
             parts[1],
-            parts[2],
+            decryptedMsg ,
             Long.parseLong(parts[3]),
             parts[6]
     );
