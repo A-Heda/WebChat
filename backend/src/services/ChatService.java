@@ -16,6 +16,8 @@ import java.util.UUID;
 
 public class ChatService {
 
+    private static final int MAX_MESSAGE_LENGTH = 100;
+
     private ChatRepository chatRepository;
     private UserRepository userRepository;
     private GroupRepository groupRepository;
@@ -23,6 +25,7 @@ public class ChatService {
     private SavedMessageRepository savedMessageRepository;
     private BlockService blockService;
     private GroupHistoryService groupHistoryService;
+    private RateLimitService rateLimitService;
 
     public ChatService() {
         chatRepository = new ChatRepository();
@@ -32,6 +35,7 @@ public class ChatService {
         savedMessageRepository = new SavedMessageRepository();
         blockService = new BlockService();
         groupHistoryService = new GroupHistoryService();
+        rateLimitService = new RateLimitService();
     }
 
     private String validateMessage(String text) {
@@ -39,10 +43,18 @@ public class ChatService {
         if (text == null || text.trim().isEmpty())
             return "Message cannot be empty.";
 
-        if (text.length() > 1000)
-            return "Message is too long.";
+        if (text.length() > MAX_MESSAGE_LENGTH)
+            return "Message is too long (max "
+                    + MAX_MESSAGE_LENGTH
+                    + " characters).";
 
         return "Message is valid.";
+    }
+
+    private void touchLastSeen(User user) {
+        if (user == null) return;
+        user.setLastSeen(System.currentTimeMillis());
+        userRepository.updateUser(user);
     }
 
     public String createPrivateChat(String user1Id, String user2Id) {
@@ -83,6 +95,9 @@ public class ChatService {
         if (sender == null)
             return "User not found.";
 
+        if (rateLimitService.isRateLimited(senderId))
+            return "You are sending messages too fast. Please slow down.";
+
         String response = validateMessage(text);
 
         if (!response.equals("Message is valid."))
@@ -122,10 +137,15 @@ public class ChatService {
 
         chatRepository.saveMessage(message);
 
+        touchLastSeen(sender);
+
         return "SUCCESS";
     }
 
     public String sendSavedMessage(String userId, String text, String mediaUrl) {
+
+        if (rateLimitService.isRateLimited(userId))
+            return "You are sending messages too fast. Please slow down.";
 
         String messageId = UUID.randomUUID().toString();
         User user = userRepository.findById(userId);
@@ -136,6 +156,11 @@ public class ChatService {
         if ((text == null || text.trim().isEmpty()) &&
                 (mediaUrl == null || mediaUrl.trim().isEmpty()))
             return "Message cannot be empty.";
+
+        if (text != null && text.length() > MAX_MESSAGE_LENGTH)
+            return "Message is too long (max "
+                    + MAX_MESSAGE_LENGTH
+                    + " characters).";
 
         String chatId = "saved_" + userId;
 
@@ -148,6 +173,8 @@ public class ChatService {
 
         SavedMessage saveMessage = new SavedMessage(userId, chatId, messageId);
         savedMessageRepository.save(saveMessage);
+
+        touchLastSeen(user);
 
         return "SUCCESS";
     }
@@ -163,6 +190,9 @@ public class ChatService {
 
         if (sender == null)
             return "User not found.";
+
+        if (rateLimitService.isRateLimited(senderId))
+            return "You are sending messages too fast. Please slow down.";
 
         if (mediaPath == null || mediaPath.trim().isEmpty())
             return "Media path cannot be empty.";
@@ -193,6 +223,8 @@ public class ChatService {
         message.setMediaUrl(mediaPath);
 
         chatRepository.saveMessage(message);
+
+        touchLastSeen(sender);
 
         return "SUCCESS";
     }
@@ -240,6 +272,8 @@ public class ChatService {
         message.setEdited(true);
 
         chatRepository.updateMessage(message);
+
+        touchLastSeen(userRepository.findById(editorId));
 
         return "SUCCESS";
     }
@@ -438,8 +472,16 @@ public class ChatService {
         if (otherUser == null)
             return null;
 
-        return new ChatPreview(chatId, otherUserId, otherUser.getUsername(),
-                otherUser.getProfileImagePath(), "PRIVATE");
+        ChatPreview preview = new ChatPreview(
+                chatId,
+                otherUserId,
+                otherUser.getUsername(),
+                otherUser.getProfileImagePath(),
+                "PRIVATE");
+
+        preview.setOtherUserLastSeen(otherUser.getLastSeen());
+
+        return preview;
     }
 
     public ChatPreview getChatInfo(String chatId, String currentUserId) {

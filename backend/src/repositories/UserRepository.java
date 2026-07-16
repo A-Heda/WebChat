@@ -16,7 +16,8 @@ public class UserRepository {
                 user.getPassword() + "|" +
                 user.getProfileImagePath() + "|" +
                 user.getFailedLoginAttempts() + "|" +
-                user.getLockedUntil();
+                user.getLockedUntil() + "|" +
+                user.getLastSeen();
     }
 
     private User deserializeUser(String line) {
@@ -31,6 +32,10 @@ public class UserRepository {
         if (parts.length >= 6) {
             user.setFailedLoginAttempts(Integer.parseInt(parts[4]));
             user.setLockedUntil(Long.parseLong(parts[5]));
+        }
+
+        if (parts.length >= 7) {
+            user.setLastSeen(Long.parseLong(parts[6]));
         }
 
     return user;

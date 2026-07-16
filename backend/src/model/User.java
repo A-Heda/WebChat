@@ -17,6 +17,7 @@ public class User {
     private List<String> contacts;
     private int failedLoginAttempts;
     private long lockedUntil = 0;
+    private long lastSeen = 0;
 
     public User(String id, String username, String password, String profileImagePath) {
         this.id = id;
@@ -117,5 +118,13 @@ public class User {
 
     public void setLockedUntil(long lockedUntil) {
         this.lockedUntil = lockedUntil;
+    }
+
+    public long getLastSeen() {
+        return lastSeen;
+    }
+
+    public void setLastSeen(long lastSeen) {
+        this.lastSeen = lastSeen;
     }
 }
