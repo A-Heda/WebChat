@@ -129,19 +129,41 @@ public class UserService {
         if (username == null || username.trim().isEmpty())
             return "Username cannot be empty";
 
-        if (password == null || password.isEmpty())
+        if(password == null || password.isEmpty())
             return "Password cannot be empty";
 
         User user = userRepository.findByUsername(username);
-        if (user == null)
+        if(user == null)
             return "User not found.";
 
-        if (!user.getPassword().equals(password))
+        long now = System.currentTimeMillis();
+
+        if(user.getLockedUntil() > now) {
+            long remainingMinutes = (user.getLockedUntil() - now) / 60000 + 1;
+            return "Account locked. Try again in " + remainingMinutes + " minute(s).";
+        }
+
+        if(!user.getPassword().equals(password)) {
+
+            user.setFailedLoginAttempts(user.getFailedLoginAttempts() + 1);
+
+            if(user.getFailedLoginAttempts() >= 5) {
+                user.setLockedUntil(now + 5 * 60 * 1000); // پنج دقیقه قفل
+                user.setFailedLoginAttempts(0);
+                userRepository.updateUser(user);
+                return "Too many failed attempts. Account locked for 5 minutes.";
+            }
+
+            userRepository.updateUser(user);                 //ذخیره در دیتابیس
             return "Wrong password";
-
-        return "SUCCESS";
-
     }
+
+    user.setFailedLoginAttempts(0);
+    user.setLockedUntil(0);
+    userRepository.updateUser(user);
+
+    return "SUCCESS";
+}
 
     public String deleteAccount(String userId, String password) {
 

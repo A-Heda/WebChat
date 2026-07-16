@@ -11,26 +11,30 @@ public class UserRepository {
     private static final String USERS_FILE = "backend/database/users.txt";
 
     private String serializeUser(User user) {
-        return user.getId() + "|" +
+        return  user.getId() + "|" +
                 user.getUsername() + "|" +
                 user.getPassword() + "|" +
-                user.getProfileImagePath();
+                user.getProfileImagePath() + "|" +
+                user.getFailedLoginAttempts() + "|" +
+                user.getLockedUntil();
     }
 
     private User deserializeUser(String line) {
-
         String[] parts = line.split("\\|", -1);
 
-        if (parts.length != 4) {
-            return null;
+        if (parts.length < 4) {
+        return null;
         }
 
-        return new User(
-                parts[0],
-                parts[1],
-                parts[2],
-                parts[3]);
-    }
+        User user = new User(parts[0], parts[1], parts[2], parts[3]);
+
+        if (parts.length >= 6) {
+            user.setFailedLoginAttempts(Integer.parseInt(parts[4]));
+            user.setLockedUntil(Long.parseLong(parts[5]));
+        }
+
+    return user;
+}
 
     public synchronized void saveUser(User user) {
 

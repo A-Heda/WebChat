@@ -16,6 +16,7 @@ public class User {
     private List<String> archivedChats;
     private List<String> contacts;
     private int failedLoginAttempts;
+    private long lockedUntil = 0;
 
     public User(String id, String username, String password, String profileImagePath) {
         this.id = id;
@@ -108,5 +109,13 @@ public class User {
 
     public void setFailedLoginAttempts(int failedLoginAttempts) {
         this.failedLoginAttempts = failedLoginAttempts;
+    }
+
+    public long getLockedUntil() {
+        return lockedUntil;
+    }
+
+    public void setLockedUntil(long lockedUntil) {
+        this.lockedUntil = lockedUntil;
     }
 }
