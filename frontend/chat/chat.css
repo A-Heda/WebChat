@@ -156,30 +156,34 @@ button {
 
 }
 
-.menu-btn{
-
-    position:absolute;
-
-    top:0;
-
-    right:-5px;
-
-    border:none;
-
-    background:none;
-
-    cursor:pointer;
-
-    font-size:18px;
-
-    display:none;
-
+.menu-btn {
+    position: absolute;
+    top: 2px;
+    right: 0;
+    border: none;
+    background: none;
+    cursor: pointer;
+    font-size: 15px;
+    line-height: 1;
+    padding: 3px 7px;
+    border-radius: 50%;
+    color: inherit;
+    opacity: .6;
+    display: none;
+    transition: background .15s, opacity .15s;
 }
 
-.message:hover .menu-btn{
+.message:hover .menu-btn {
+    display: block;
+}
 
-    display:block;
+.menu-btn:hover {
+    opacity: 1;
+    background: rgba(0, 0, 0, .08);
+}
 
+.sent .menu-btn:hover {
+    background: rgba(255, 255, 255, .2);
 }
 
 .message-menu {

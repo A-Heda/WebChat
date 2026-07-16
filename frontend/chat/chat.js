@@ -472,6 +472,7 @@ function renderMessages(messages) {
 
             ${renderMedia(message)}
 
+                    ${chatType !== "SAVED" ? `
                     <button
                         class="menu-btn"
                         onclick="toggleMenu(event,'${message.id}', ${message.senderId === currentUserId})">
@@ -482,6 +483,7 @@ function renderMessages(messages) {
                         class="message-menu hidden"
                         id="menu-${message.id}">
                     </div>
+                    ` : ""}
 
                 </div>
             `;
@@ -673,8 +675,9 @@ function toggleMenu(event, messageId, isMine) {
             "menu-" + messageId
         );
 
+    if(chatType === "SAVED") {}
 
-    if (isMine) {
+    else if (isMine) {
 
         menu.innerHTML =
 
