@@ -212,6 +212,24 @@ window.onload = async function () {
 
     await loadMessages();
 
+    await fetch(API + "/chats/mark-read", {
+
+        method: "PUT",
+
+        headers: {
+            "Content-Type":"application/json"
+        },
+
+        body: JSON.stringify({
+
+            userId: currentUserId,
+
+            chatId: chatId
+
+        })
+
+    });
+
     setInterval(loadMessages, 3000);
 };
 

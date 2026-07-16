@@ -25,4 +25,12 @@ public class ChatStatusService {
     public boolean isArchived(String userId, String chatId) {
         return chatStatusRepository.isArchived(userId, chatId);
     }
+
+    public long getLastRead(String userId, String chatId) {
+        return chatStatusRepository.getLastRead(userId, chatId);
+    }
+
+    public void markAsRead(String userId, String chatId) {
+        chatStatusRepository.markAsRead(userId, chatId, System.currentTimeMillis());
+    }
 }

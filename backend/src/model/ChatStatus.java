@@ -5,13 +5,24 @@ public class ChatStatus {
     private String chatId;
     private boolean pinned;
     private boolean archived;
+    private long lastReadTimestamp;
 
     public ChatStatus(String userId, String chatId, boolean pinned, boolean archived) {
         this.userId = userId;
         this.chatId = chatId;
         this.pinned = pinned;
         this.archived = archived;
+        //this.lastReadTimestamp = lastReadTimestamp;    //added new constructor to avoid changes in other classes
     }
+
+    public ChatStatus(String userId, String chatId, boolean pinned, boolean archived, long lastReadTimestamp) {
+        this.userId = userId;
+        this.chatId = chatId;
+        this.pinned = pinned;
+        this.archived = archived;
+        this.lastReadTimestamp = lastReadTimestamp;
+    }
+
     public String getUserId() {
         return userId;
     }
@@ -36,4 +47,10 @@ public class ChatStatus {
     public void setArchived(boolean archived) {
         this.archived = archived;
     }    
+    public long getLastReadTimestamp() {
+        return lastReadTimestamp;
+    }
+    public void setLastReadTimestamp(long lastReadTimestamp) {
+        this.lastReadTimestamp = lastReadTimestamp;
+    }
 }

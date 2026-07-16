@@ -190,16 +190,15 @@ public class ChatController implements HttpHandler {
 
                 break;
 
-            // case "/chsts/cerate-group" : added the group creation feature to group
-            // controller
+            case "/chats/mark-read":
 
-            // if(method.equals("POST")) {
-            // createGroup(exchange);
-            // } else {
-            // sendResponse(exchange , "Method not allowed" , 405);
-            // }
+                if(method.equals("PUT")) {
+                    markAsRead(exchange);
+                } else {
+                    sendResponse(exchange, "Method not allowed", 405);
+                }
 
-            // break;
+                break;
 
             default:
                 sendResponse(exchange, "Route not found", 404);
@@ -490,6 +489,21 @@ private void pinChat(HttpExchange exchange) throws IOException {
 
     sendResponse(exchange,"SUCCESS",200);
 
+}
+
+private void markAsRead(HttpExchange exchange) throws IOException {
+
+    BufferedReader reader =
+            new BufferedReader(new InputStreamReader(exchange.getRequestBody()));
+
+    JsonObject json = gson.fromJson(reader, JsonObject.class);
+
+    String userId = json.get("userId").getAsString();
+    String chatId = json.get("chatId").getAsString();
+
+    chatStatusService.markAsRead(userId, chatId);
+
+    sendResponse(exchange, "SUCCESS", 200);
 }
 
     private void saveMessage(HttpExchange exchange) throws IOException {

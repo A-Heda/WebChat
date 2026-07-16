@@ -354,11 +354,10 @@ function renderChats(chats) {
     }
 
     chats.sort((a, b) => {
-
         if (a.pinned !== b.pinned)
             return b.pinned - a.pinned;
 
-        return 0;
+        return (b.lastMessageTime || 0) - (a.lastMessageTime || 0);
     });
 
     if (chats.length === 0) {
@@ -385,55 +384,44 @@ function renderChats(chats) {
                 : "../assets/default-avatar.png";
 
         div.innerHTML = `
+    <img class="chat-avatar" src="${image}">
 
-<img class="chat-avatar"
-     src="${image}">
-
-<div class="chat-info">
-
-    <div class="chat-name">
-
-        ${chat.otherUsername}
-
-        ${chat.pinned ? "📌" : ""}
-
-    </div>
-
-    <div class="chat-type">
-
-        ${chat.type}
-
-    </div>
-
-</div>
-
-<div class="chat-menu">
-
-    <button class="menu-btn"
-        onclick="event.stopPropagation();toggleMenu(this)">
-
-        <i class="fa-solid fa-ellipsis-vertical"></i>
-
-    </button>
-
-    <div class="menu-dropdown">
-
-        <div onclick="event.stopPropagation();togglePin(chatMap['${chat.chatId}'])">
-
-            ${chat.pinned ? "📌 Unpin" : "📌 Pin"}
-
+    <div class="chat-info">
+        <div class="chat-name">
+            ${chat.otherUsername}
+            ${chat.pinned ? "📌" : ""}
+            ${
+                chat.unreadCount > 0
+                    ? `<span class="unread-badge">${chat.unreadCount}</span>`
+                    : ""
+            }
         </div>
 
-        <div onclick="event.stopPropagation();toggleArchive(chatMap['${chat.chatId}'])">
-
-            ${chat.archived ? "📦 Unarchive" : "📦 Archive"}
-
+        <div class="chat-type">
+            ${chat.type}
         </div>
-
     </div>
 
-</div>
+    <div class="chat-menu">
+        <button
+            class="menu-btn"
+            onclick="event.stopPropagation();toggleMenu(this)"
+        >
+            <i class="fa-solid fa-ellipsis-vertical"></i>
+        </button>
+
+        <div class="menu-dropdown">
+            <div onclick="event.stopPropagation();togglePin(chatMap['${chat.chatId}'])">
+                ${chat.pinned ? "📌 Unpin" : "📌 Pin"}
+            </div>
+
+            <div onclick="event.stopPropagation();toggleArchive(chatMap['${chat.chatId}'])">
+                ${chat.archived ? "📦 Unarchive" : "📦 Archive"}
+            </div>
+        </div>
+    </div>
 `;
+
 
         div.onclick = function () {
 

@@ -11,49 +11,69 @@ public class ChatStatusRepository {
 
     public List<ChatStatus> loadAll() {
         List<ChatStatus> result = new ArrayList<>();
-
         File file = new File(FILE);
+        if (!file.exists()) return result;
 
-        if(!file.exists())
-            return result;
-
-        try(BufferedReader reader = new BufferedReader(new FileReader(file))) {
-
+        try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
             String line;
+            while ((line = reader.readLine()) != null) {
+                String[] parts = line.split("\\|", -1);
+                if (parts.length < 4) continue;
 
-            while((line = reader.readLine()) != null) {
-                String[] parts = line.split("\\|");
+                long lastRead = parts.length >= 5 ? Long.parseLong(parts[4]) : 0L;
+                Boolean archived = Boolean.parseBoolean(parts[3]);
+                Boolean pinned = Boolean.parseBoolean(parts[2]);
 
-                if(parts.length != 4)
-                    continue;
-
-                result.add(new ChatStatus(parts[0], parts[1],
-                            Boolean.parseBoolean(parts[2]),
-                            Boolean.parseBoolean(parts[3])));
-            }
-        } catch(IOException e) {
-            e.printStackTrace();
+                result.add(new ChatStatus(parts[0], parts[1], pinned, archived, lastRead));
         }
-
-        return result;
+    } catch (IOException e) {
+        e.printStackTrace();
     }
+    return result;
+}
 
-    private synchronized void saveAll(List<ChatStatus> list) {
-
-        try(BufferedWriter writer = new BufferedWriter(new FileWriter(FILE))) {
-            for(ChatStatus status : list){
-
-                writer.write(status.getUserId()+"|"+
-                             status.getChatId()+"|"+
-                             status.isPinned()+"|"+
-                             status.isArchived());
-
+    private void saveAll(List<ChatStatus> list) {
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(FILE))) {
+            for (ChatStatus status : list) {
+                writer.write(status.getUserId() + "|" +
+                             status.getChatId() + "|" +
+                             status.isPinned() + "|" +
+                             status.isArchived() + "|" +
+                            status.getLastReadTimestamp());
                 writer.newLine();
             }
-        } catch(IOException e){
+        } catch (IOException e) {
             e.printStackTrace();
         }
     }
+
+
+    public long getLastRead(String userId, String chatId) {
+        ChatStatus chatStatus = findStatus(userId, chatId);
+        return chatStatus == null ? 0 : chatStatus.getLastReadTimestamp();
+    }
+
+    public void markAsRead(String userId, String chatId, long lastReadTimestamp) {
+        List<ChatStatus> chatStatusList = loadAll();
+        ChatStatus existingStatus = null;
+
+        for (ChatStatus chatStatus : chatStatusList) {
+            if (chatStatus.getUserId().equals(userId) && chatStatus.getChatId().equals(chatId)) {
+                existingStatus = chatStatus;
+                break;
+            }
+        }
+
+        if (existingStatus == null) {
+            existingStatus = new ChatStatus(userId, chatId, false, false, lastReadTimestamp);
+            chatStatusList.add(existingStatus);
+        } else {
+            existingStatus.setLastReadTimestamp(lastReadTimestamp);
+        }
+
+        saveAll(chatStatusList);
+    }
+
 
     private ChatStatus findStatus(String userId, String chatId){
 
@@ -106,7 +126,7 @@ public class ChatStatusRepository {
         }
 
         if(target == null) {          //وجود نداشت
-            target = new ChatStatus(userId, chatId, pinned,false);
+            target = new ChatStatus(userId, chatId, pinned,false, 0);
             list.add(target);
         }
         else {
@@ -133,7 +153,7 @@ public class ChatStatusRepository {
         }
 
         if(target == null){
-            target = new ChatStatus(userId, chatId, false, archived);
+            target = new ChatStatus(userId, chatId, false, archived, 0);
             list.add(target);
         } 
         else {

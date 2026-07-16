@@ -315,29 +315,59 @@ public class ChatService {
 
             if (otherUser == null)
                 continue;
+            ChatPreview preview = new ChatPreview(chatId, otherUserId, otherUser.getUsername(),
+                otherUser.getProfileImagePath(), "PRIVATE",
+                chatStatusRepository.isPinned(userId, chatId),
+                chatStatusRepository.isArchived(userId, chatId));
 
-            result.add(new ChatPreview(chatId, otherUserId, otherUser.getUsername(),
-                    otherUser.getProfileImagePath(), "PRIVATE",
-                    chatStatusRepository.isPinned(userId, chatId),
-                    chatStatusRepository.isArchived(userId, chatId)));
+            fillUnreadAndLastTime(preview, chatId, userId);
+            result.add(preview);
         }
 
         return result;
     }
 
     public List<ChatPreview> getGroupChats(String userId) {
-
+    
         List<ChatPreview> result = new ArrayList<>();
         List<Group> groups = groupRepository.getUserGroups(userId);
-
         for (Group group : groups) {
-            result.add(new ChatPreview("group_" + group.getId(), group.getId(), group.getName(),
-                    group.getGroupImagePath(), "GROUP", chatStatusRepository.isPinned(userId, "group_" + group.getId()),
-                    chatStatusRepository.isArchived(userId, "group_" + group.getId())));
+            String chatId = "group_" + group.getId();
+            ChatPreview preview = new ChatPreview(chatId, group.getId(), group.getName(),
+                group.getGroupImagePath(), "GROUP", chatStatusRepository.isPinned(userId, chatId),
+                chatStatusRepository.isArchived(userId, chatId));
+
+        fillUnreadAndLastTime(preview, chatId, userId);
+
+        result.add(preview);
+    }
+
+    return result;
+}
+
+    private void fillUnreadAndLastTime(ChatPreview chatPreview, String chatId, String userId) {
+        List<Message> chatMessages = chatRepository.getAllMessages(chatId);
+
+        long lastReadTimestamp = chatStatusRepository.getLastRead(userId, chatId);
+        long lastMessageTimestamp = 0;
+        int unreadMessageCount = 0;
+
+        for(Message message : chatMessages) {
+            if(message.getTimestamp() > lastMessageTimestamp) {
+                lastMessageTimestamp = message.getTimestamp();
+            }
+
+            if(!message.getSenderId().equals(userId)
+                    && !message.isDeleted()
+                    && message.getTimestamp() > lastReadTimestamp) {
+                    unreadMessageCount++;
+            }
         }
 
-        return result;
+        chatPreview.setUnreadCount(unreadMessageCount);
+        chatPreview.setLastMessageTime(lastMessageTimestamp);
     }
+
 
     public List<ChatPreview> getUserChats(String userId) {
 
