@@ -11,7 +11,7 @@ public class GroupHistoryRepository {
     private static final String FILE =
             "backend/database/group_history.txt";
 
-    public void saveHistory(GroupHistory history) {
+    public synchronized void saveHistory(GroupHistory history) {
 
         try {
 

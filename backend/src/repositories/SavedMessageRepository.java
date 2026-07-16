@@ -19,7 +19,7 @@ public class SavedMessageRepository {
                saved.getMessageId();
     }
 
-    public void save(SavedMessage saved) {
+    public synchronized void save(SavedMessage saved) {
 
         try{
             File file = new File(FILE);

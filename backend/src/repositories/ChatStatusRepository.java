@@ -38,7 +38,7 @@ public class ChatStatusRepository {
         return result;
     }
 
-    private void saveAll(List<ChatStatus> list) {
+    private synchronized void saveAll(List<ChatStatus> list) {
 
         try(BufferedWriter writer = new BufferedWriter(new FileWriter(FILE))) {
             for(ChatStatus status : list){

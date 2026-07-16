@@ -148,7 +148,7 @@ public class ChatRepository {
         }
     }
 
-    public void saveMessage (Message message) {               //writes a message in database          
+    public synchronized void saveMessage (Message message) {               //writes a message in database          
         File chatsDirectory = new File(CHATS_DIRECTORY);
 
         if(!chatsDirectory.exists()) {
@@ -221,7 +221,7 @@ public class ChatRepository {
     }
     
 
-    public void updateMessage (Message updatedMessage) {
+    public synchronized void updateMessage (Message updatedMessage) {
         List<Message> messages = getAllMessages(updatedMessage.getChatId());
 
         for(int i = 0 ; i< messages.size() ; i++) {

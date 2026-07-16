@@ -32,7 +32,7 @@ public class UserRepository {
                 parts[3]);
     }
 
-    public void saveUser(User user) {
+    public synchronized void saveUser(User user) {
 
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(USERS_FILE, true))) {
 
@@ -106,7 +106,7 @@ public class UserRepository {
         return null;
     }
 
-    public void updateUser(User updatedUser) {
+    public synchronized void updateUser(User updatedUser) {
 
         List<User> users = getAllUsers();
 
@@ -132,7 +132,7 @@ public class UserRepository {
         }
     }
 
-    public void overwriteUsers(List<User> users) {
+    public synchronized void overwriteUsers(List<User> users) {
 
         try (BufferedWriter writer = new BufferedWriter(
                 new FileWriter(USERS_FILE))) {

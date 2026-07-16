@@ -43,7 +43,7 @@ public class BlockRepository {
         return list;
     }
 
-    private void saveAll(List<BlockedUser> list) {
+    private synchronized void saveAll(List<BlockedUser> list) {
 
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(FILE))) {
 

@@ -27,7 +27,7 @@ public class ContactRepository {
         return contact;
     }
 
-    public void saveContact(Contact contact) {
+    public synchronized void saveContact(Contact contact) {
         try(BufferedWriter writer = new BufferedWriter(new FileWriter(CONTACT_FILE, true))) {
             writer.write(serializeContact(contact));
             writer.newLine();
@@ -78,7 +78,7 @@ public class ContactRepository {
         return result;
     }
 
-    public void updateContact(Contact updatedContact) {
+    public synchronized void updateContact(Contact updatedContact) {
         List<Contact> contacts = getAllContacts();
         for(int i = 0; i < contacts.size(); i++) {
             Contact contact = contacts.get(i);
@@ -99,7 +99,7 @@ public class ContactRepository {
         }
     }
 
-    public void deleteContact(String ownerId, String contactId) {
+    public synchronized void deleteContact(String ownerId, String contactId) {
         List<Contact> contacts = getAllContacts();
         contacts.removeIf(contact -> contact.getOwnerId().equals(ownerId) &&
                 contact.getContactId().equals(contactId));

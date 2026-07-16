@@ -59,7 +59,7 @@ public class GroupRepository {
     return group;
 }
 
-    public void saveGroup (Group group) {
+    public synchronized void saveGroup (Group group) {
         try(BufferedWriter writer = new BufferedWriter(new FileWriter(GROUP_FILE, true))) {
 
         writer.write(serializeGroup(group));
@@ -105,7 +105,7 @@ public class GroupRepository {
         return null;
     }
 
-    public void updateGroup (Group updatedGroup) {
+    public synchronized void updateGroup (Group updatedGroup) {
         List<Group> groups = getAllGroups();
 
         for(int i = 0 ; i < groups.size() ; i++) {
@@ -126,7 +126,7 @@ public class GroupRepository {
         }
     }
 
-    public void deleteGroup (String groupId) {
+    public synchronized void deleteGroup (String groupId) {
         List<Group> groups = getAllGroups();
 
         for(int i = 0 ; i < groups.size() ; i++) {
