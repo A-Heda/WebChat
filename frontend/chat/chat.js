@@ -660,17 +660,8 @@ function toggleMenu(event, messageId, isMine) {
             "menu-" + messageId
         );
 
-    if (chatType === "SAVED") {
 
-        menu.innerHTML = `
-        <div onclick="deleteMessage('${messageId}')">
-            🗑 Delete
-        </div>
-        `;
-
-    }
-
-    else if (isMine) {
+    if (isMine) {
 
         menu.innerHTML =
 
