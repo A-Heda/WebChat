@@ -107,11 +107,12 @@ async function leaveGroup() {
     }
 }
 
-function addMember() {
+function addMember(){
 
-    location.href =
-        "../new-chat/new-chat.html?groupId=" +
-        groupId;
+    document
+        .getElementById("add-member-modal")
+        .classList.remove("hidden");
+
 }
 
 function editGroup() {
@@ -186,5 +187,73 @@ async function checkStatus() {
 }
 
 function openHistory() {
-    window.location.href = "group-history.html?groupId=" + groupId;
+    window.location.href =
+        "../group-history/group-history.html?groupId=" + groupId;
+}
+
+function closeAddMember(){
+
+    document
+        .getElementById("add-member-modal")
+        .classList.add("hidden");
+
+}
+
+async function submitAddMember(){
+
+    const userId =
+        document
+        .getElementById("member-id")
+        .value
+        .trim();
+
+    if(userId===""){
+
+        alert("Enter user ID");
+
+        return;
+    }
+
+    const response =
+        await fetch(
+            API + "/groups/add-member",
+            {
+
+                method:"POST",
+
+                headers:{
+                    "Content-Type":"application/json"
+                },
+
+                body:JSON.stringify({
+
+                    groupId:groupId,
+
+                    userId:userId
+
+                })
+
+            });
+
+    const result =
+        await response.json();
+
+    if(response.ok){
+
+        alert("Member added.");
+
+        closeAddMember();
+
+        document
+            .getElementById("member-id")
+            .value="";
+
+        loadGroup();
+
+    }else{
+
+        alert(result);
+
+    }
+
 }

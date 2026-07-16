@@ -204,9 +204,12 @@ public class ChatService {
         // فقط برای گروه
         if (chatId.startsWith("group_")) {
 
+            String groupId =
+                    chatId.substring("group_".length());
+
             groupHistoryService.saveHistory(
 
-                    chatId,
+                    groupId,
                     message.getId(),
                     message.getSenderId(),
                     message.getText(), // متن قبل از ادیت
@@ -242,9 +245,12 @@ public class ChatService {
         // فقط برای گروه
         if (chatId.startsWith("group_")) {
 
+            String groupId =
+                    chatId.substring("group_".length());
+
             groupHistoryService.saveHistory(
 
-                    chatId,
+                    groupId,
                     message.getId(),
                     message.getSenderId(),
                     message.getText(), // متن قبل از حذف

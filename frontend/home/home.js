@@ -6,6 +6,7 @@ const isArchivePage =
 let contacts = [];
 let selectedMembers = [];
 let chatMap = {};
+let allChats = [];
 
 /*Elements*/
 const chatList = document.getElementById("chat-list");
@@ -326,7 +327,8 @@ async function loadChats() {
         const chats =
             await response.json();
 
-        renderChats(chats);
+        allChats = chats;
+        searchChats();
 
     } catch (error) {
 
@@ -443,6 +445,41 @@ function openChat(chat) {
         chat.chatId +
         "&type=" +
         chat.type;
+}
+
+/*Search chats in sidebar*/
+function searchChats() {
+
+    const keyword = document
+        .getElementById("search-input")
+        .value
+        .toLowerCase()
+        .trim();
+
+    if (keyword === "") {
+
+        renderChats(allChats);
+        return;
+    }
+
+    const filtered = allChats.filter(chat => {
+
+        const name =
+            (chat.otherUsername || "")
+                .toLowerCase();
+
+        const id =
+            (chat.chatId || "")
+                .toLowerCase();
+
+        return (
+            name.includes(keyword) ||
+            id.includes(keyword)
+        );
+
+    });
+
+    renderChats(filtered);
 }
 
 /*Logout*/
