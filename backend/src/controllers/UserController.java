@@ -569,22 +569,25 @@ public class UserController implements HttpHandler {
 
     // PUT /users/profile-image
     private void updateProfileImage(HttpExchange exchange) throws IOException {
+        BufferedReader requestReader = new BufferedReader(new InputStreamReader(exchange.getRequestBody()));
 
-        BufferedReader reader = new BufferedReader(new InputStreamReader(exchange.getRequestBody()));
+        JsonObject requestBody = gson.fromJson(requestReader, JsonObject.class);
 
-        JsonObject json = gson.fromJson(reader, JsonObject.class);
+        String userId = requestBody.get("userId").getAsString();
+        String profileImageBase64 = requestBody.get("image").getAsString();
 
-        String userId = json.get("userId").getAsString();
-        String imagePath = json.get("imagePath").getAsString();
+        String updateResult = userService.updateProfileImage(
+            userId,
+            profileImageBase64
+    );
 
-        String result = userService.updateProfileImage(userId, imagePath);
-
-        if (result.equals("SUCCESS")) {
-            sendResponse(exchange, result, 200);
+        if (updateResult.equals("SUCCESS")) {
+            sendResponse(exchange, updateResult, 200);
         } else {
-            sendResponse(exchange, result, 400);
+            sendResponse(exchange, updateResult, 400);
         }
     }
+
 
     // GET /users/id?id=...
     private void findUserById(HttpExchange exchange) throws IOException {

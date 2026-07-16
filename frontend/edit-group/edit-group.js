@@ -18,7 +18,7 @@ async function loadGroup() {
     const group = await response.json();
 
     document.getElementById("group-name").value =
-        group.groupName;
+        group.name;
 
     document.getElementById("group-id").value =
         group.id;

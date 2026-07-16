@@ -338,29 +338,28 @@ async function loadChats() {
 
 /*Render chats in sidebar*/
 function renderChats(chats) {
+
     chatMap = {};
 
     chatList.innerHTML = "";
 
     if (isArchivePage) {
 
-    chats = chats.filter(chat => chat.archived);
+        chats = chats.filter(chat => chat.archived);
 
     } else {
 
-    chats = chats.filter(chat => !chat.archived);
+        chats = chats.filter(chat => !chat.archived);
 
     }
 
-chats.sort((a, b) => {
+    chats.sort((a, b) => {
 
-    if (a.pinned !== b.pinned)
+        if (a.pinned !== b.pinned)
+            return b.pinned - a.pinned;
 
-        return b.pinned - a.pinned;
-
-    return 0;
-
-});
+        return 0;
+    });
 
     if (chats.length === 0) {
 
@@ -370,37 +369,25 @@ chats.sort((a, b) => {
         return;
     }
 
-    // chats = chats
-    // .filter(chat =>
-
-    //     isArchivePage
-    //         ? chat.archived
-    //         : !chat.archived
-
-    // )
-    // .sort((a, b) => {
-
-    //     if (a.pinned !== b.pinned) {
-    //         return b.pinned - a.pinned;
-    //     }
-
-    //     return 0;
-    // });
-
     chats.forEach(chat => {
 
         chatMap[chat.chatId] = chat;
 
-        const div =
-            document.createElement("div");
+        const div = document.createElement("div");
 
-        div.className =
-            "chat-item";
+        div.className = "chat-item";
+
+        const image =
+            chat.imagePath &&
+            chat.imagePath.trim() !== "" &&
+            chat.imagePath !== "null"
+                ? chat.imagePath
+                : "../assets/default-avatar.png";
 
         div.innerHTML = `
 
 <img class="chat-avatar"
-     src="${chat.imagePath || "../assets/default-avatar.png"}">
+     src="${image}">
 
 <div class="chat-info">
 
@@ -446,17 +433,18 @@ chats.sort((a, b) => {
     </div>
 
 </div>
-
 `;
 
-        div.onclick =
-            function () {
+        div.onclick = function () {
 
-                openChat(chat);
-            };
+            openChat(chat);
+
+        };
 
         chatList.appendChild(div);
+
     });
+
 }
 
 /*Open selected chat*/
@@ -562,9 +550,12 @@ async function createGroup() {
 
 function openChangePhoto() {
 
-    document.getElementById("photo-upload").click();
+    closeModal("settings-modal");
+
+    openModal("change-photo-modal");
 
 }
+
 
 function openChangeName() {
 
@@ -715,46 +706,51 @@ function toggleDarkMode() {
 
     }
 
-    async function handlePhotoUpload(event) {
+    async function saveProfileImage() {
 
-        const file =
-            event.target.files[0];
+    const imagePath =
+        document.getElementById("profile-image-input").value.trim();
 
-        if (!file)
-            return;
+    if (imagePath === "") {
 
-        const imagePath =
-            "../assets/" + file.name;
+        alert("Image path cannot be empty.");
+
+        return;
+    }
+
+    try {
 
         const response =
-            await fetch(API + "/users/profile-image", {
+            await fetch(
+                API + "/users/profile-image",
+                {
 
-                method: "PUT",
+                    method: "PUT",
 
-                headers: {
-                    "Content-Type": "application/json"
-                },
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
 
-                body: JSON.stringify({
+                    body: JSON.stringify({
 
-                    userId: localStorage.getItem("userId"),
+                        userId: currentUserId,
 
-                    imagePath: imagePath
+                        imagePath: imagePath
 
-                })
+                    })
 
-            });
+                });
 
         const result =
             await response.json();
 
         if (response.ok) {
 
-            document
-                .getElementById("profile-pic")
-                .src = imagePath;
+            closeModal("change-photo-modal");
 
-            alert("Profile updated.");
+            loadChats();
+
+            alert("Profile photo updated.");
 
         } else {
 
@@ -762,7 +758,108 @@ function toggleDarkMode() {
 
         }
 
+    } catch (error) {
+
+        console.error(error);
+
+        alert("Cannot update profile photo.");
+
     }
+
+}
+
+    async function handlePhotoUpload(event){
+
+
+    const file =
+        event.target.files[0];
+
+
+    if(!file)
+        return;
+
+
+
+    const reader =
+        new FileReader();
+
+
+
+    reader.onload = async function(){
+
+
+        const base64 =
+            reader.result;
+
+
+
+        const response =
+            await fetch(
+                API + "/users/profile-image",
+                {
+
+                method:"PUT",
+
+                headers:{
+                    "Content-Type":"application/json"
+                },
+
+
+                body:JSON.stringify({
+
+                    userId:
+                    localStorage.getItem("userId"),
+
+
+                    image:
+                    base64
+
+                })
+
+            });
+
+
+
+        const result =
+            await response.json();
+
+
+
+        if(response.ok){
+
+
+            document
+            .getElementById("profile-pic")
+            .src = base64;
+
+
+
+            closeModal(
+                "change-photo-modal"
+            );
+
+
+            loadChats();
+
+
+            alert(
+                "Profile updated"
+            );
+
+
+        }else{
+
+            alert(result);
+
+        }
+
+
+    };
+
+
+    reader.readAsDataURL(file);
+
+}
 
     async function deleteAccount() {
 

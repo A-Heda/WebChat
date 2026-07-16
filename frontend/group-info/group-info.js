@@ -27,7 +27,7 @@ async function loadGroup() {
     }
 
     document.getElementById("group-name").textContent =
-        group.groupName;
+        group.name;
 
     document.getElementById("group-id").textContent =
         "Group ID: " + group.id;

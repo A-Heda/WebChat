@@ -225,6 +225,36 @@
         </div>
     </div>
 
+    <div class="modal-overlay" id="change-photo-modal">
+    <div class="modal">
+
+        <h3>Change Profile Photo</h3>
+
+        <input
+             
+                type="file"
+                id="profile-file"
+                accept="image/*"
+                onchange="handlePhotoUpload(event)">
+
+        <div class="modal-actions">
+
+            <button
+                    onclick="closeModal('change-photo-modal')">
+                Cancel
+            </button>
+
+        </div>
+
+    </div>
+</div>
+
+<div class="modal-actions">
+    <button onclick="closeModal('change-photo-modal')">Cancel</button>
+</div>
+
+
+
     <div class="modal-overlay" id="delete-account-modal">
         <div class="modal">
             <h3>Delete Account</h3>

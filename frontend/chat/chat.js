@@ -234,31 +234,27 @@ async function loadChatInfo() {
             await response.json();
 
         if (response.ok) {
-            otherUserId =
-                chat.otherUserId;
+            otherUserId = chat.otherUserId;
+            otherUsername = chat.otherUsername;
 
-            otherUsername =
-                chat.otherUsername;
+            chatName.textContent = chat.otherUsername;
+            chatSubtitle.textContent = "User ID: " + chat.otherUserId;
 
-            chatName.textContent =
-                chat.otherUsername;
+            document.getElementById("chat-avatar").src =
+                chat.imagePath && chat.imagePath.trim() !== ""
+                ? chat.imagePath
+                : "../assets/default-avatar.png";
 
-            chatSubtitle.textContent =
-                "User ID: " + chat.otherUserId;
         } else {
-
             alert(chat);
         }
 
     } catch (error) {
-
         console.error(error);
-
         alert("Cannot load chat info.");
     }
 }
 
-/* Load GroupChat Header */
 /* Load GroupChat Header */
 async function loadGroupInfo() {
 

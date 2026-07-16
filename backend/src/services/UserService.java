@@ -1,5 +1,9 @@
 package services;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.util.Base64;
+
 import model.User;
 import repositories.UserRepository;
 
@@ -199,13 +203,48 @@ public class UserService {
         return "SUCCESS";
     }
 
-    public String updateProfileImage(String userId, String imagePath) {
-        User user = userRepository.findById(userId);
-        if (user == null)
-            return "User not found.";
+    public String updateProfileImage(String userId, String profileImageBase64) {
+        try {
+            User targetUser = findUserById(userId);
 
-        user.setProfileImagePath(imagePath);
-        userRepository.updateUser(user);
+            if (targetUser == null) {
+                return "User not found";
+            }
+
+            String profileImageFileName = "profile_" + userId + ".png";
+            String assetsDirectoryPath = "frontend/assets/";
+
+            File assetsDirectory = new File(assetsDirectoryPath);
+            if (!assetsDirectory.exists()) {
+                assetsDirectory.mkdirs();
+            }
+
+            File profileImageFile = new File(assetsDirectoryPath + profileImageFileName);
+
+            byte[] imageBytes = Base64.getDecoder().decode(
+                profileImageBase64.split(",")[1]);
+
+            FileOutputStream imageOutputStream = new FileOutputStream(profileImageFile);
+            imageOutputStream.write(imageBytes);
+            imageOutputStream.close();
+
+            String savedImagePath = "../assets/" + profileImageFileName;
+
+            targetUser.setProfileImagePath(savedImagePath);
+            userRepository.updateUser(targetUser);
+
         return "SUCCESS";
+
+    } catch (Exception exception) {
+        exception.printStackTrace();
+        return "ERROR";
     }
+}
+
+    public String getProfileImage(String userId) {
+        User user = findUserById(userId);
+        if (user == null)
+            return null;
+        return user.getProfileImagePath();
+}
 }
