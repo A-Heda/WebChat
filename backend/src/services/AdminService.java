@@ -59,6 +59,17 @@ public class AdminService {
             }
         }
 
+        for (String chatId : chatRepository.getAllPrivateChatIds()) {
+
+            List<Message> messages = chatRepository.getAllMessages(chatId);
+
+            for (Message m : messages) {
+                if (!m.getReportedBy().isEmpty()) {
+                    reported.add(m);
+                }
+            }
+        }
+
         return reported;
     }
 

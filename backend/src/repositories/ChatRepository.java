@@ -132,6 +132,29 @@ public class ChatRepository {
         }
     }
 
+    public List<String> getAllPrivateChatIds() {                 //returns all the private chats, not only for a specific user
+
+        List<String> list = new ArrayList<>();
+        File dir = new File(CHATS_DIRECTORY);
+        File[] arr = dir.listFiles();
+
+        if (arr == null) {
+            return list;
+        }
+
+        for (int i = 0; i < arr.length; i++) {
+            File f = arr[i];
+            String name = f.getName();
+        
+            if (name.startsWith("private_") && name.endsWith(".txt")) {
+                String id = name.substring(0, name.length() - 4);
+                list.add(id);
+            }
+        }
+
+    return list;
+}
+
     public void createGroupChatFile (String groupId) {
         File chatsDirectory = new File(CHATS_DIRECTORY);
 

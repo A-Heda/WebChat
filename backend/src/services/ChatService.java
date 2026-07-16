@@ -88,7 +88,7 @@ public class ChatService {
         if (!response.equals("Message is valid."))
             return response;
 
-        // ================= Block Check =================
+        // ================= Block Check =================               //check if blocked
 
         if (chatId.startsWith("private_")) {
 
@@ -166,6 +166,20 @@ public class ChatService {
 
         if (mediaPath == null || mediaPath.trim().isEmpty())
             return "Media path cannot be empty.";
+
+        if (chatId.startsWith("private_")) {              //check if blocked 
+            String[] parts = chatId.split("_");
+            if (parts.length == 3) {
+                String user1 = parts[1];
+                String user2 = parts[2];
+
+                String otherUser = senderId.equals(user1) ? user2 : user1;
+
+                if (blockService.isBlocked(senderId, otherUser)) {
+                    return "You cannot send messages because one of the users has blocked the other.";
+                }
+            }
+        }
 
         String messageId = UUID.randomUUID().toString();
 
