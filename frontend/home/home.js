@@ -23,6 +23,9 @@ window.onload = function () {
 
     loadContacts();
 
+    setInterval(loadChats, 4000);
+    setInterval(loadContacts, 8000);
+
     document.getElementById("contact-search")
         .addEventListener("input", searchContacts);
 };

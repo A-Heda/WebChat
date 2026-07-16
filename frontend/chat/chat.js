@@ -1,7 +1,9 @@
 const API = "http://localhost:8080";
 
-let lastChatMessageCount = 0;
-let lastSavedMessageCount = 0;
+//let lastChatMessageCount = 0;          we will compare the value not the count to render again if there was new msgs
+let lastMessagesSnapshot = "";
+//let lastSavedMessageCount = 0;               هم چنین
+let lastSavedSnapshot = "";
 
 const params =
     new URLSearchParams(window.location.search);
@@ -341,9 +343,11 @@ async function loadMessages() {
 
         if (response.ok) {
 
-            if (messages.length !== lastChatMessageCount) {
+            const snapshot = JSON.stringify(messages);
 
-                lastChatMessageCount = messages.length;
+            if (snapshot !== lastMessagesSnapshot) {
+
+                lastMessagesSnapshot = snapshot;
 
                 renderMessages(messages);
             }
@@ -377,9 +381,11 @@ async function loadSavedMessages() {
 
         if (response.ok) {
 
-            if (messages.length !== lastSavedMessageCount) {
+            const snapshot = JSON.stringify(messages);
 
-                lastSavedMessageCount = messages.length;
+            if (snapshot !== lastSavedSnapshot) {
+
+                lastSavedSnapshot = snapshot;
                 renderMessages(messages);
 
             }
