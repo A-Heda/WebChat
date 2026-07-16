@@ -4,6 +4,8 @@ const API = "http://localhost:8080";
 let lastMessagesSnapshot = "";
 //let lastSavedMessageCount = 0;               هم چنین
 let lastSavedSnapshot = "";
+let allMessages = [];
+let isSearchActive = false;
 
 const params =
     new URLSearchParams(window.location.search);
@@ -349,7 +351,13 @@ async function loadMessages() {
 
                 lastMessagesSnapshot = snapshot;
 
-                renderMessages(messages);
+                allMessages = messages;
+
+                if (isSearchActive) {
+                    applyMessageSearch();
+                } else {
+                    renderMessages(messages);
+                }
             }
 
         } else {
@@ -386,8 +394,13 @@ async function loadSavedMessages() {
             if (snapshot !== lastSavedSnapshot) {
 
                 lastSavedSnapshot = snapshot;
-                renderMessages(messages);
+                allMessages = messages;
 
+                if (isSearchActive) {
+                    applyMessageSearch();
+                } else {
+                    renderMessages(messages);
+                }
             }
 
         } else {
@@ -900,3 +913,61 @@ openInfo.onclick = function () {
             otherUserId;
     }
 };
+
+/* In-chat message search */
+const searchBox = document.getElementById("search-box");
+
+searchBox.addEventListener("input", function () {
+
+    const keyword = this.value.trim();
+
+    if (keyword === "") {
+
+        isSearchActive = false;
+        renderMessages(allMessages);
+        return;
+    }
+
+    isSearchActive = true;
+    applyMessageSearch();
+
+});
+
+searchBox.addEventListener("keydown", function (event) {
+
+    if (event.key === "Escape") {
+
+        this.value = "";
+        isSearchActive = false;
+        renderMessages(allMessages);
+    }
+
+});
+
+function applyMessageSearch() {
+
+    const keyword = searchBox.value
+        .toLowerCase()
+        .trim();
+
+    if (keyword === "") {
+
+        renderMessages(allMessages);
+        return;
+    }
+
+    const filtered = allMessages.filter(message => {
+
+        if (!message || message.deleted)
+            return false;
+
+        const text =
+            (message.text || "")
+                .toLowerCase();
+
+        return text.includes(keyword);
+
+    });
+
+    renderMessages(filtered);
+}
