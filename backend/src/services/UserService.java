@@ -98,7 +98,7 @@ public class UserService {
         if (!password.equals(repeatPassword))
             return "Repeating the password went wrong.";
 
-        User user = new User(id, username, password, null);
+        User user = new User(id, username, securePass(password), null);
         userRepository.saveUser(user);
 
         return "SUCCESS";
@@ -143,7 +143,7 @@ public class UserService {
             return "Account locked. Try again in " + remainingMinutes + " minute(s).";
         }
 
-        if(!user.getPassword().equals(password)) {
+        if(!user.getPassword().equals(securePass(password))) {
 
             user.setFailedLoginAttempts(user.getFailedLoginAttempts() + 1);
 
@@ -172,7 +172,7 @@ public class UserService {
         if (user == null)
             return "User not found.";
 
-        if (!user.getPassword().equals(password))
+        if (!user.getPassword().equals(securePass(password)))
             return "Wrong password.";
 
         userRepository.deleteUser(userId);
@@ -193,7 +193,7 @@ public class UserService {
         if (user == null)
             return "User not found.";
 
-        if (!user.getPassword().equals(oldPassword))
+        if (!user.getPassword().equals(securePass(oldPassword)))
             return "Old password is incorrect.";
 
         String passwordValidateResponse = validatePassword(newPassword, user.getUsername());
@@ -203,7 +203,7 @@ public class UserService {
         if (oldPassword.equals(newPassword))
             return "New password should be different.";
 
-        user.setPassword(newPassword);
+        user.setPassword(securePass(newPassword));
         userRepository.updateUser(user);
         return "SUCCESS";
     }
@@ -268,5 +268,16 @@ public class UserService {
         if (user == null)
             return null;
         return user.getProfileImagePath();
-}
+    }
+
+    private String securePass(String p) {        //hashes the password to save to the database
+        int code = 17; 
+    
+        for(int i = 0; i < p.length(); i++) {
+            char c = p.charAt(i);
+            code = (code * 31) + (int)c;
+            code = code ^ (code >> 4);            //shift to right and fill with zero & XOR bytes
+        }
+        return "h_" + Math.abs(code);
+    }
 }
