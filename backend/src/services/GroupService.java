@@ -42,7 +42,7 @@ public class GroupService {
         return "Group name is valid.";
     }
 
-    public String createGroup(String id, String name, String adminId) { // not used yet
+    public String createGroup(String id, String name, String adminId) {
 
         String idResponse = validateGroupId(id);
         if (!idResponse.equals("Group ID is valid."))

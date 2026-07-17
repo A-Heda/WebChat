@@ -14,7 +14,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 
 
-
 public class ChatRepository {
     private static final String CHATS_DIRECTORY = "backend/database/chats/";
 
@@ -104,7 +103,7 @@ public class ChatRepository {
     return generatePrivateChatId(user1Id, user2Id);
     }
 
-    private String getChatFilePath (String chatId) {          //e.g. database/chats/private_1_2.txt   
+    private String getChatFilePath (String chatId) {
         return CHATS_DIRECTORY + chatId + ".txt";
     }
 
@@ -121,7 +120,7 @@ public class ChatRepository {
         }
 
         String chatId = generatePrivateChatId(user1Id, user2Id);
-        File chatFile = new File(getChatFilePath(chatId));           //only creates an obj not a real file
+        File chatFile = new File(getChatFilePath(chatId));
 
         if(!chatFile.exists()) {
         try {
@@ -132,7 +131,7 @@ public class ChatRepository {
         }
     }
 
-    public List<String> getAllPrivateChatIds() {                 //returns all the private chats, not only for a specific user
+    public List<String> getAllPrivateChatIds() {
 
         List<String> list = new ArrayList<>();
         File dir = new File(CHATS_DIRECTORY);
@@ -145,7 +144,7 @@ public class ChatRepository {
         for (int i = 0; i < arr.length; i++) {
             File f = arr[i];
             String name = f.getName();
-        
+
             if (name.startsWith("private_") && name.endsWith(".txt")) {
                 String id = name.substring(0, name.length() - 4);
                 list.add(id);
@@ -163,7 +162,7 @@ public class ChatRepository {
         }
 
         String chatId = "group_" + groupId;
-        File chatFile = new File(getChatFilePath(chatId));           //only creates an obj not a real file
+        File chatFile = new File(getChatFilePath(chatId));
         if(!chatFile.exists()) {
             try {
                 chatFile.createNewFile();
@@ -173,7 +172,7 @@ public class ChatRepository {
         }
     }
 
-    public synchronized void saveMessage (Message message) {               //writes a message in database          
+    public synchronized void saveMessage (Message message) {
         File chatsDirectory = new File(CHATS_DIRECTORY);
 
         if(!chatsDirectory.exists()) {
@@ -211,7 +210,7 @@ public class ChatRepository {
         try (BufferedReader reader = new BufferedReader(new FileReader(chatFile))) {
         String line;
         while ((line = reader.readLine()) != null) {
-       
+
             Message message = deserializeMessage(line);
 
             if (message != null) {
@@ -244,7 +243,7 @@ public class ChatRepository {
         }
         return chats;
     }
-    
+
 
     public synchronized void updateMessage (Message updatedMessage) {
         List<Message> messages = getAllMessages(updatedMessage.getChatId());
@@ -289,7 +288,7 @@ public class ChatRepository {
     public boolean deleteGroupChatFile(String groupId) {
         String chatId = "group_" + groupId;
         File chatFile = new File(getChatFilePath(chatId));
-    
+
         if (chatFile.exists()) {
             return chatFile.delete();
         }

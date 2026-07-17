@@ -1,4 +1,4 @@
-// Group.java
+
 package model;
 
 import java.util.ArrayList;

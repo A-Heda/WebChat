@@ -110,10 +110,10 @@ public class AdminService {
             if (group == null) {
                 return "Group not found";
             }
-        
+
             groupRepository.deleteGroup(groupId);
             chatRepository.deleteGroupChatFile(groupId);
-        
+
             return "Group deleted successfully";
         } catch (Exception e) {
         return "Error deleting group: " + e.getMessage();

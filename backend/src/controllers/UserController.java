@@ -38,7 +38,7 @@ public class UserController implements HttpHandler {
     @Override
     public void handle(HttpExchange exchange) throws IOException {
 
-        exchange.getResponseHeaders().add("Access-Control-Allow-Origin", "*"); // اتصال فرانت به بک با فعال کردن CORS
+        exchange.getResponseHeaders().add("Access-Control-Allow-Origin", "*");
         exchange.getResponseHeaders().add("Access-Control-Allow-Headers", "Content-Type");
         exchange.getResponseHeaders().add("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
 
@@ -233,7 +233,7 @@ public class UserController implements HttpHandler {
         }
     }
 
-    // POST /users/register
+
     private void register(HttpExchange exchange) throws IOException {
 
         BufferedReader reader = new BufferedReader(new InputStreamReader(exchange.getRequestBody()));
@@ -254,7 +254,7 @@ public class UserController implements HttpHandler {
         }
     }
 
-    // POST /users/login
+
     private void login(HttpExchange exchange) throws IOException {
 
         BufferedReader reader = new BufferedReader(new InputStreamReader(exchange.getRequestBody()));
@@ -270,8 +270,8 @@ public class UserController implements HttpHandler {
             User user = userService.findUserByUsername(username);
             JsonObject response = new JsonObject();
             response.addProperty("id", user.getId());
-            response.addProperty("username", user.getUsername()); // also sends userId&username via its response to
-                                                                  // frontend
+            response.addProperty("username", user.getUsername());
+
             sendResponse(exchange, response, 200);
         } else {
             sendResponse(exchange, result, 401);
@@ -547,7 +547,7 @@ public class UserController implements HttpHandler {
         sendResponse(exchange, response, 200);
     }
 
-    // PUT /users/password
+
     private void changePassword(HttpExchange exchange) throws IOException {
 
         BufferedReader reader = new BufferedReader(new InputStreamReader(exchange.getRequestBody()));
@@ -567,7 +567,7 @@ public class UserController implements HttpHandler {
         }
     }
 
-    // PUT /users/profile-image
+
     private void updateProfileImage(HttpExchange exchange) throws IOException {
         BufferedReader requestReader = new BufferedReader(new InputStreamReader(exchange.getRequestBody()));
 
@@ -589,7 +589,6 @@ public class UserController implements HttpHandler {
     }
 
 
-    // GET /users/id?id=...
     private void findUserById(HttpExchange exchange) throws IOException {
 
         String query = exchange.getRequestURI().getQuery();
@@ -610,7 +609,7 @@ public class UserController implements HttpHandler {
         }
     }
 
-    // GET /users/username?username=...
+
     private void findUserByUsername(HttpExchange exchange) throws IOException {
 
         String query = exchange.getRequestURI().getQuery();

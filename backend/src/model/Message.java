@@ -1,4 +1,4 @@
-// Message.java
+
 package model;
 
 import java.util.ArrayList;

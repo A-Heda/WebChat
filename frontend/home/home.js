@@ -8,12 +8,12 @@ let selectedMembers = [];
 let chatMap = {};
 let allChats = [];
 
-/*Elements*/
+
 const chatList = document.getElementById("chat-list");
 
 const contactInput = document.getElementById("contact-id-input");
 
-/*Load chats when page opens*/
+
 window.onload = function () {
 
     loadTheme();
@@ -129,8 +129,8 @@ function renderGroupMembers() {
         `;
 
         item.querySelector("input").addEventListener("change", (e) => {
-            selectedMembers = e.target.checked 
-                ? [...selectedMembers, c.id] 
+            selectedMembers = e.target.checked
+                ? [...selectedMembers, c.id]
                 : selectedMembers.filter(id => id !== c.id);
 
         });
@@ -232,7 +232,7 @@ async function addContact(){
     }
 
 }
-/*Create private chat*/
+
 async function createPrivateChat(otherUserId) {
 
     try {
@@ -302,7 +302,6 @@ async function loadUserInfo(){
 }
 
 
-/*Get all chats of current user*/
 async function loadChats() {
 
     const userId =
@@ -341,7 +340,7 @@ async function loadChats() {
     }
 }
 
-/*Render chats in sidebar*/
+
 function renderChats(chats) {
 
     chatMap = {};
@@ -440,7 +439,7 @@ function renderChats(chats) {
 
 }
 
-/*Open selected chat*/
+
 function openChat(chat) {
 
     window.location.href =
@@ -450,7 +449,7 @@ function openChat(chat) {
         chat.type;
 }
 
-/*Search chats in sidebar*/
+
 function searchChats() {
 
     const keyword = document
@@ -485,7 +484,7 @@ function searchChats() {
     renderChats(filtered);
 }
 
-/*Logout*/
+
 function logout() {
 
     localStorage.clear();
@@ -807,10 +806,8 @@ function toggleDarkMode() {
         return;
 
 
-
     const reader =
         new FileReader();
-
 
 
     reader.onload = async function(){
@@ -818,7 +815,6 @@ function toggleDarkMode() {
 
         const base64 =
             reader.result;
-
 
 
         const response =
@@ -847,10 +843,8 @@ function toggleDarkMode() {
             });
 
 
-
         const result =
             await response.json();
-
 
 
         if(response.ok){
@@ -859,7 +853,6 @@ function toggleDarkMode() {
             document
             .getElementById("profile-pic")
             .src = base64;
-
 
 
             closeModal(
@@ -1018,5 +1011,3 @@ function toggleMenu(button) {
 
     menu.classList.toggle("show");
 }
-
-    

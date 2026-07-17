@@ -37,7 +37,7 @@ public class GroupController implements HttpHandler {
     @Override
     public void handle(HttpExchange exchange) throws IOException {
 
-        exchange.getResponseHeaders().add("Access-Control-Allow-Origin", "*"); // اتصال فرانت به بک با فعال کردن CORS
+        exchange.getResponseHeaders().add("Access-Control-Allow-Origin", "*");
         exchange.getResponseHeaders().add("Access-Control-Allow-Headers", "Content-Type");
         exchange.getResponseHeaders().add("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
 
@@ -46,7 +46,7 @@ public class GroupController implements HttpHandler {
             return;
         }
 
-        String method = exchange.getRequestMethod(); // POST , GET , PUT
+        String method = exchange.getRequestMethod();
         String path = exchange.getRequestURI().getPath();
 
         switch (path) {

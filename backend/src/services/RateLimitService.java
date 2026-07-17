@@ -12,10 +12,7 @@ public class RateLimitService {
     private final ConcurrentHashMap<String, Deque<Long>> sendTimestamps =
             new ConcurrentHashMap<>();
 
-    /**
-     * Returns true if the user has exceeded the rate limit
-     * (more than MAX_MESSAGES sends within WINDOW_MILLIS).
-     */
+
     public boolean isRateLimited(String userId) {
 
         long now = System.currentTimeMillis();

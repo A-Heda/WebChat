@@ -103,7 +103,6 @@ public class ChatService {
         if (!response.equals("Message is valid."))
             return response;
 
-        // ================= Block Check =================               //check if blocked
 
         if (chatId.startsWith("private_")) {
 
@@ -124,7 +123,6 @@ public class ChatService {
             }
         }
 
-        // =================================================
 
         String messageId = UUID.randomUUID().toString();
 
@@ -197,7 +195,7 @@ public class ChatService {
         if (mediaPath == null || mediaPath.trim().isEmpty())
             return "Media path cannot be empty.";
 
-        if (chatId.startsWith("private_")) {              //check if blocked 
+        if (chatId.startsWith("private_")) {
             String[] parts = chatId.split("_");
             if (parts.length == 3) {
                 String user1 = parts[1];
@@ -247,7 +245,7 @@ public class ChatService {
         if (!response.equals("Message is valid."))
             return response;
 
-        // فقط برای گروه
+
         if (chatId.startsWith("group_")) {
 
             String groupId =
@@ -258,7 +256,7 @@ public class ChatService {
                     groupId,
                     message.getId(),
                     message.getSenderId(),
-                    message.getText(), // متن قبل از ادیت
+                    message.getText(),
                     "EDIT"
 
             );
@@ -290,7 +288,7 @@ public class ChatService {
         if (!message.getSenderId().equals(requesterId))
             return "You can only delete your own messages.";
 
-        // فقط برای گروه
+
         if (chatId.startsWith("group_")) {
 
             String groupId =
@@ -301,7 +299,7 @@ public class ChatService {
                     groupId,
                     message.getId(),
                     message.getSenderId(),
-                    message.getText(), // متن قبل از حذف
+                    message.getText(),
                     "DELETE"
 
             );
@@ -382,7 +380,7 @@ public class ChatService {
     }
 
     public List<ChatPreview> getGroupChats(String userId) {
-    
+
         List<ChatPreview> result = new ArrayList<>();
         List<Group> groups = groupRepository.getUserGroups(userId);
         for (Group group : groups) {

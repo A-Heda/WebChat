@@ -125,7 +125,7 @@ public class ChatStatusRepository {
 
         }
 
-        if(target == null) {          //وجود نداشت
+        if(target == null) {
             target = new ChatStatus(userId, chatId, pinned,false, 0);
             list.add(target);
         }
@@ -155,7 +155,7 @@ public class ChatStatusRepository {
         if(target == null){
             target = new ChatStatus(userId, chatId, false, archived, 0);
             list.add(target);
-        } 
+        }
         else {
             target.setArchived(archived);
         }
@@ -163,4 +163,3 @@ public class ChatStatusRepository {
     }
 
 }
-

@@ -8,7 +8,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 
-
 public class SavedMessageRepository {
 
     private static final String FILE = "backend/database/saved_messages.txt";
@@ -36,7 +35,6 @@ public class SavedMessageRepository {
     }
 
 
-
     public List<SavedMessage> getUserSavedMessages(String userId){
 
         List<SavedMessage> result = new ArrayList<>();
@@ -51,7 +49,7 @@ public class SavedMessageRepository {
 
             String line;
             while((line=reader.readLine()) != null) {
-                String[] p = line.split("\\|"); 
+                String[] p = line.split("\\|");
 
                 if(p[0].equals(userId)){
                     result.add(new SavedMessage(p[0], p[1], p[2]));

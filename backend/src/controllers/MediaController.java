@@ -46,7 +46,7 @@ public class MediaController implements HttpHandler {
     public void loadMedia (HttpExchange exchange) throws IOException {
         String requestPath = exchange.getRequestURI().getPath();
 
-        // e.g. : backend/media/images/test.png -> images/test.png
+
         String requestedFilePath = requestPath.substring("/media/".length());
 
         File requestedFile = new File(MEDIA_ROOT_DIRECTORY + requestedFilePath);
@@ -88,8 +88,8 @@ public class MediaController implements HttpHandler {
 
         String fileExtension = "";
         int index = originalFileName.lastIndexOf(".");
-        if(index != -1) {                                               //درصورت نبود پسوند کرش نکند
-            fileExtension = originalFileName.substring(index);         
+        if(index != -1) {
+            fileExtension = originalFileName.substring(index);
         }
 
         String targetFolder;

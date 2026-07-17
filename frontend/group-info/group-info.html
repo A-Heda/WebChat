@@ -33,8 +33,6 @@
 
         <button onclick="leaveGroup()">Leave Group</button>
 
-        <button onclick="addMember()">Add Member</button>
-
         <button onclick="editGroup()">Edit Group</button>
 
         <button onclick="openArchive()">Add to Archive</button>
@@ -43,13 +41,8 @@
 
     </div>
 
-</div>
 
-
-<!-- ADD MEMBER MODAL -->
-<div id="add-member-modal" class="modal hidden">
-
-    <div class="modal-content">
+    <div class="form">
 
         <h3>Add Member</h3>
 
@@ -58,19 +51,7 @@
             id="member-id"
             placeholder="Enter User ID">
 
-
-        <div class="modal-buttons">
-
-            <button onclick="closeAddMember()">
-                Cancel
-            </button>
-
-
-            <button onclick="submitAddMember()">
-                Add
-            </button>
-
-        </div>
+        <button onclick="submitAddMember()">Add</button>
 
     </div>
 

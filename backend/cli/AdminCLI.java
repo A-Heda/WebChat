@@ -43,8 +43,8 @@ public class AdminCLI {
             System.out.println("2. Add user");
             System.out.println("3. Delete user");
             System.out.println("4. Show groups");
-            System.out.println("5. Create group");           
-            System.out.println("6. Delete group");           
+            System.out.println("5. Create group");
+            System.out.println("6. Delete group");
             System.out.println("7. Add member to group");
             System.out.println("8. Remove member");
             System.out.println("9. Reported messages");
@@ -111,7 +111,6 @@ public class AdminCLI {
                     break;
 
 
-
                 case 5:
                     System.out.print("Group ID: ");
                     String newGroupId = scanner.nextLine();
@@ -119,12 +118,11 @@ public class AdminCLI {
                     String groupName = scanner.nextLine();
                     System.out.print("Admin ID: ");
                     String adminId = scanner.nextLine();
-    
+
                     String createResult = adminService.createGroup(newGroupId, groupName, adminId);
                     System.out.println(createResult);
 
                 break;
-
 
 
                 case 6:
@@ -134,7 +132,6 @@ public class AdminCLI {
                     System.out.println("Deleted.");
 
                 break;
-                
 
 
                 case 7:

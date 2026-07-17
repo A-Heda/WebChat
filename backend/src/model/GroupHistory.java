@@ -6,7 +6,7 @@ public class GroupHistory {
     private String messageId;
     private String senderId;
     private String text;
-    private String action; // EDIT یا DELETE
+    private String action;
     private long time;
 
     public GroupHistory(String groupId,

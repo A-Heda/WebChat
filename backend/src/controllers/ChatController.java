@@ -36,7 +36,7 @@ public class ChatController implements HttpHandler {
     @Override
     public void handle(HttpExchange exchange) throws IOException {
 
-        exchange.getResponseHeaders().add("Access-Control-Allow-Origin", "*"); // اتصال فرانت به بک با فعال کردن CORS
+        exchange.getResponseHeaders().add("Access-Control-Allow-Origin", "*");
         exchange.getResponseHeaders().add("Access-Control-Allow-Headers", "Content-Type");
         exchange.getResponseHeaders().add("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
 
@@ -205,7 +205,7 @@ public class ChatController implements HttpHandler {
         }
     }
 
-    // POST /chats/create-private
+
     private void createPrivateChat(HttpExchange exchange) throws IOException {
 
         BufferedReader reader = new BufferedReader(new InputStreamReader(exchange.getRequestBody()));
@@ -218,21 +218,20 @@ public class ChatController implements HttpHandler {
 
         String result = chatService.createPrivateChat(user1Id, user2Id);
 
-        if (result.startsWith("private_")) { // means created succesfully
+        if (result.startsWith("private_")) {
             sendResponse(exchange, result, 200);
         } else {
             sendResponse(exchange, result, 400);
         }
     }
 
-    // POST /chats/send
+
     private void sendMessage(HttpExchange exchange) throws IOException {
 
         BufferedReader reader = new BufferedReader(new InputStreamReader(exchange.getRequestBody()));
 
         JsonObject json = gson.fromJson(reader, JsonObject.class);
 
-        // String messageId = json.get("messageId").getAsString();
 
         String senderId = json.get("senderId").getAsString();
 
@@ -249,7 +248,7 @@ public class ChatController implements HttpHandler {
         }
     }
 
-    // PUT /chats/edit
+
     private void editMessage(HttpExchange exchange) throws IOException {
 
         BufferedReader reader = new BufferedReader(new InputStreamReader(exchange.getRequestBody()));
@@ -273,7 +272,7 @@ public class ChatController implements HttpHandler {
         }
     }
 
-    // DELETE /chats/delete
+
     private void deleteMessage(HttpExchange exchange) throws IOException {
 
         BufferedReader reader = new BufferedReader(new InputStreamReader(exchange.getRequestBody()));
@@ -319,7 +318,7 @@ public class ChatController implements HttpHandler {
             sendResponse(exchange, result, 400);
     }
 
-    // GET /chats/messages?chatId=...
+
     private void getMessages(HttpExchange exchange) throws IOException {
 
     String query = exchange.getRequestURI().getQuery();
@@ -384,7 +383,7 @@ public class ChatController implements HttpHandler {
         sendResponse(exchange, chats, 200);
     }
 
-    // GET /chats/info?chatId=private_1_2&userId=1
+
     private void getChatInfo(HttpExchange exchange) throws IOException {
 
         String query = exchange.getRequestURI().getQuery();
@@ -415,40 +414,9 @@ public class ChatController implements HttpHandler {
         sendResponse(exchange, info, 200);
     }
 
-    // private void createGroup(HttpExchange exchange) throws IOException {
-
-    // BufferedReader reader = new BufferedReader(new
-    // InputStreamReader(exchange.getRequestBody()));
-
-    // JsonObject json = gson.fromJson(reader, JsonObject.class);
-
-    // String groupId = json.get("groupId").getAsString();
-
-    // String groupName = json.get("groupName").getAsString();
-
-    // String adminId = json.get("adminId").getAsString();
-
-    // List<String> memberIds = new ArrayList<>();
-
-    // JsonArray members = json.getAsJsonArray("memberIds");
-
-    // for(int i = 0 ; i < members.size() ; i++) {
-    // memberIds.add(members.get(i).getAsString());
-    // }
-
-    // String result = chatService.createGroupChat(groupId, groupName, adminId,
-    // memberIds);
-
-    // if(result.startsWith("group_")) {
-    // sendResponse(exchange,result,200);
-    // } else {
-    // sendResponse(exchange,result,400);
-    // }
-
-    // }
 
     private void archiveChat(HttpExchange exchange) throws IOException{
-        BufferedReader reader = 
+        BufferedReader reader =
             new BufferedReader(new InputStreamReader(exchange.getRequestBody()));
 
         JsonObject json =
@@ -555,7 +523,6 @@ private void markAsRead(HttpExchange exchange) throws IOException {
 }
 
 
-    // POST /chats/saved/send
     private void sendSavedMessage(HttpExchange exchange) throws IOException {
 
         BufferedReader reader = new BufferedReader(new InputStreamReader(exchange.getRequestBody()));
@@ -586,7 +553,7 @@ private void markAsRead(HttpExchange exchange) throws IOException {
         new BufferedReader(new InputStreamReader(exchange.getRequestBody()));
 
     JsonObject requestBody = gson.fromJson(requestReader, JsonObject.class);
-    
+
     if(!requestBody.has("mediaUrl")){
         sendResponse(exchange,"Missing mediaUrl",400);
         return;

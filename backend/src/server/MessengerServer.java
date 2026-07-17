@@ -19,17 +19,17 @@ public class MessengerServer {
 
             server.createContext("/users",new UserController());
 
-            
+
             server.createContext("/groups",new GroupController());
 
-            
+
             server.createContext("/chats",new ChatController());
 
             server.createContext("/contacts", new ContactController());
-            
+
             server.createContext("/media", new MediaController());
 
-            
+
             server.setExecutor(Executors.newFixedThreadPool(10));
             server.start();
             System.out.println( "Messenger Server Started On Port 8080");

@@ -1,9 +1,9 @@
 package model;
 
 public class Contact {
-    private String ownerId;      // صاحب لیست مخاطبین
-    private String contactId;    // مخاطب
-    private boolean blocked;     // آیا صاحب لیست، مخاطب را بلاک کرده؟
+    private String ownerId;
+    private String contactId;
+    private boolean blocked;
 
 
     public Contact(String ownerId, String contactId) {

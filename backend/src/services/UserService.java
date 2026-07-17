@@ -148,13 +148,13 @@ public class UserService {
             user.setFailedLoginAttempts(user.getFailedLoginAttempts() + 1);
 
             if(user.getFailedLoginAttempts() >= 5) {
-                user.setLockedUntil(now + 5 * 60 * 1000); // پنج دقیقه قفل
+                user.setLockedUntil(now + 5 * 60 * 1000);
                 user.setFailedLoginAttempts(0);
                 userRepository.updateUser(user);
                 return "Too many failed attempts. Account locked for 5 minutes.";
             }
 
-            userRepository.updateUser(user);                 //ذخیره در دیتابیس
+            userRepository.updateUser(user);
             return "Wrong password";
     }
 
@@ -270,13 +270,13 @@ public class UserService {
         return user.getProfileImagePath();
     }
 
-    private String securePass(String p) {        //hashes the password to save to the database
-        int code = 17; 
-    
+    private String securePass(String p) {
+        int code = 17;
+
         for(int i = 0; i < p.length(); i++) {
             char c = p.charAt(i);
             code = (code * 31) + (int)c;
-            code = code ^ (code >> 4);            //shift to right and fill with zero & XOR bytes
+            code = code ^ (code >> 4);
         }
         return "h_" + Math.abs(code);
     }

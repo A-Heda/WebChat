@@ -1,8 +1,8 @@
 const API = "http://localhost:8080";
 
-//let lastChatMessageCount = 0;          we will compare the value not the count to render again if there was new msgs
+
 let lastMessagesSnapshot = "";
-//let lastSavedMessageCount = 0;               هم چنین
+
 let lastSavedSnapshot = "";
 let allMessages = [];
 let isSearchActive = false;
@@ -19,7 +19,7 @@ const chatType =
 const currentUserId =
     localStorage.getItem("userId");
 
-/* Elements */
+
 const openInfo = document.getElementById("open-info");
 
 let otherUserId = null;
@@ -28,6 +28,23 @@ let otherUsername = null;
 const chatName = document.getElementById("chat-name");
 
 const chatSubtitle = document.getElementById("chat-subtitle");
+
+const ONLINE_THRESHOLD_MS = 60000;
+
+function formatLastSeen(timestamp) {
+
+    if (!timestamp || timestamp === 0) {
+        return "Last seen: unknown";
+    }
+
+    if (Date.now() - timestamp < ONLINE_THRESHOLD_MS) {
+        return "Online";
+    }
+
+    const date = new Date(timestamp);
+
+    return "Last seen " + date.toLocaleString("en-US");
+}
 
 const messagesContainer = document.getElementById("messages-container");
 
@@ -169,8 +186,6 @@ async function sendMedia(mediaUrl){
 }
 
 
-/* Page Load */
-
 window.onload = async function () {
 
     if (chatType === "SAVED") {
@@ -212,6 +227,8 @@ window.onload = async function () {
     } else {
 
         await loadChatInfo();
+
+        setInterval(loadChatInfo, 3000);
     }
 
     await loadMessages();
@@ -237,7 +254,6 @@ window.onload = async function () {
     setInterval(loadMessages, 3000);
 };
 
-/* Load PrivateChat Header */
 
 async function loadChatInfo() {
 
@@ -260,7 +276,13 @@ async function loadChatInfo() {
             otherUsername = chat.otherUsername;
 
             chatName.textContent = chat.otherUsername;
-            chatSubtitle.textContent = "User ID: " + chat.otherUserId;
+            chatSubtitle.textContent =
+                formatLastSeen(chat.otherUserLastSeen);
+            chatSubtitle.classList.toggle(
+                "online",
+                chat.otherUserLastSeen &&
+                Date.now() - chat.otherUserLastSeen < ONLINE_THRESHOLD_MS
+            );
 
             document.getElementById("chat-avatar").src =
                 chat.imagePath && chat.imagePath.trim() !== ""
@@ -277,7 +299,7 @@ async function loadChatInfo() {
     }
 }
 
-/* Load GroupChat Header */
+
 async function loadGroupInfo() {
 
     try {
@@ -297,7 +319,7 @@ async function loadGroupInfo() {
 
         if (response.ok) {
 
-            // برای صفحه Group Info
+
             otherUserId = group.id;
 
             chatName.textContent =
@@ -327,7 +349,6 @@ async function loadGroupInfo() {
     }
 }
 
-/* Load Messages */
 
 async function loadMessages() {
 
@@ -417,7 +438,6 @@ async function loadSavedMessages() {
 
 }
 
-/* Render Messages */
 
 function renderMessages(messages) {
 
@@ -549,7 +569,6 @@ function renderMedia(message) {
     `;
 }
 
-/* Send Message */
 
 async function sendMessage() {
 
@@ -865,7 +884,6 @@ async function reportMessage(messageId) {
 
 }
 
-/* Buttons */
 
 sendButton.onclick =
     sendMessage;
@@ -917,7 +935,7 @@ openInfo.onclick = function () {
     }
 };
 
-/* In-chat message search */
+
 const searchBox = document.getElementById("search-box");
 
 searchBox.addEventListener("input", function () {

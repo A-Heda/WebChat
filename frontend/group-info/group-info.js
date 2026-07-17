@@ -73,7 +73,7 @@ function goBack() {
     window.history.back();
 }
 
-/* ACTIONS */
+
 async function leaveGroup() {
 
     const userId =
@@ -105,14 +105,6 @@ async function leaveGroup() {
 
         alert(result);
     }
-}
-
-function addMember(){
-
-    document
-        .getElementById("add-member-modal")
-        .classList.remove("hidden");
-
 }
 
 function editGroup() {
@@ -191,14 +183,6 @@ function openHistory() {
         "../group-history/group-history.html?groupId=" + groupId;
 }
 
-function closeAddMember(){
-
-    document
-        .getElementById("add-member-modal")
-        .classList.add("hidden");
-
-}
-
 async function submitAddMember(){
 
     const userId =
@@ -241,8 +225,6 @@ async function submitAddMember(){
     if(response.ok){
 
         alert("Member added.");
-
-        closeAddMember();
 
         document
             .getElementById("member-id")
